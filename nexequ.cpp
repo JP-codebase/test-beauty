@@ -8,7 +8,6 @@ bool isSingleton(unsigned int index, unsigned int* partition) {
   for (int i = index - 1; i >= 0; i--) {
     if (partition[i] == partition[index]) return false;
   }
-
   return true;
 }
 
@@ -33,7 +32,6 @@ int main() {
     partition[i] = 0;
   }
 
-  std::cout << isSingleton(setSize - 1, partition) << std::endl;
 
   // Print
 
