@@ -14,7 +14,9 @@ bool isSingleton(unsigned int index, unsigned int* partition) {
 // TODO : genereate only 1 element of the sequence
 // The function generates the next partition given the current
 // It returns if the program reaches its end (`true` == exeuction finished`)
+
 bool nexequ(unsigned int* partition, unsigned int setSize) {
+
   // 1: Find highest non singleton element `active`
   unsigned int active;
   for (active = setSize - 1; active >= 1; active--) {
@@ -74,7 +76,7 @@ int main() {
   do {
     completed = nexequ(partition, setSize);
     counter++;
-  } while ((counter < 60) && !completed);
+  } while ((counter < 600) && !completed);
 
   // Print
 
