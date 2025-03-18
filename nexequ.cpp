@@ -5,10 +5,23 @@
 // 0 <= `j` < `index` in the array
 
 bool isSingleton(unsigned int index, unsigned int* partition) {
-  for (int i = index - 1; i >= 0; i--) {
-    if (partition[i] == partition[index]) return false;
+  for (unsigned int i = 1; i < index + 1; i++) {
+    if (partition[index - i] == partition[index]) return false;
   }
   return true;
+}
+
+// TODO : genereate only 1 element of the sequence
+void nexeq(unsigned int* parition, unsigned int setSize) {
+  // 1: Find highest non singleton element `active`
+
+  int active;
+  for (active = setSize - 1; active >= 0; active--) {
+  }
+
+  // 2: Move `active` to the next subset class
+
+  // 3: Move alle elements ]`active`, `setSize`[ in the first subset class
 }
 
 int main() {
@@ -20,7 +33,7 @@ int main() {
 
   /*unsigned char* set {new unsigned char [setSize]};*/
   /**/
-  /*for (int i = 0; i < setSize; i++){*/
+  /*for (unsigned int i = 0; i < setSize; i++){*/
   /*  set[i] = i + 'a';*/
   /*  std::cout << set[i] << ' ';*/
   /*}*/
@@ -28,16 +41,20 @@ int main() {
 
   unsigned int* partition{new unsigned int[setSize]};
 
-  for (int i = 0; i < setSize; i++) {
+  for (unsigned int i = 0; i < setSize; i++) {
     partition[i] = 0;
   }
-
 
   // Print
 
   std::cout << "----------------------------------" << std::endl;
-  for (int i = 0; i < setSize; i++) {
+  for (unsigned int i = 0; i < setSize; i++) {
     std::cout << partition[i] << ' ';
+  }
+  std::cout << std::endl;
+
+  for (unsigned int i = 0; i < setSize; i++) {
+    std::cout << isSingleton(i, partition) << ' ';
   }
   std::cout << std::endl;
 
