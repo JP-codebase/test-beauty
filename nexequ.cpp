@@ -16,7 +16,6 @@ bool isSingleton(unsigned int index, unsigned int* partition) {
 // It returns if the program reaches its end (`true` == exeuction finished`)
 
 bool nexequ(unsigned int* partition, unsigned int setSize) {
-
   // 1: Find highest non singleton element `active`
   unsigned int active;
   for (active = setSize - 1; active >= 1; active--) {
@@ -28,23 +27,11 @@ bool nexequ(unsigned int* partition, unsigned int setSize) {
   // 2: Move `active` to the next subset class
   partition[active]++;
 
-  // Print partition
-  for (unsigned int i = 0; i < setSize; i++) {
-    std::cout << partition[i] << ' ';
-  }
-  std::cout << std::endl;
-
   // 3: Move alle elements ]`active`, `setSize`[ in the first subset class
   if (active != (setSize - 1)) {
     for (unsigned int i{active + 1}; i < setSize; i++) {
       partition[i] = 0;
     }
-
-    // Print partition
-    for (unsigned int i = 0; i < setSize; i++) {
-      std::cout << partition[i] << ' ';
-    }
-    std::cout << std::endl;
   }
 
   return false;
@@ -71,25 +58,20 @@ int main() {
     partition[i] = 0;
   }
 
-  unsigned int counter{0};
+  unsigned int counter{1};
   bool completed{false};
   do {
     completed = nexequ(partition, setSize);
+
+    // Print partition
+    std::cout << counter << ": \t";
+    for (unsigned int i = 0; i < setSize; i++) {
+      std::cout << partition[i] << ' ';
+    }
+    std::cout << std::endl;
+
     counter++;
   } while ((counter < 600) && !completed);
-
-  // Print
-
-  std::cout << "----------------------------------" << std::endl;
-  for (unsigned int i = 0; i < setSize; i++) {
-    std::cout << partition[i] << ' ';
-  }
-  std::cout << std::endl;
-
-  for (unsigned int i = 0; i < setSize; i++) {
-    std::cout << isSingleton(i, partition) << ' ';
-  }
-  std::cout << std::endl;
 
   return 0;
 }
