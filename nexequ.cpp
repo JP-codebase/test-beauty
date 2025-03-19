@@ -1,5 +1,6 @@
 #include <iostream>
 
+// isSingleton
 // Given an element in the `index` array cell, this function
 // checks if there exists an other element with index `j` such that
 // 0 <= `j` < `index` in the array
@@ -11,7 +12,43 @@ bool isSingleton(unsigned int index, unsigned int* partition) {
   return true;
 }
 
-// The function generates the next partition given the current
+// TODO: template for different type of int 
+// Binomial coefficient
+
+unsigned int binomial(unsigned int n, unsigned int k) {
+  unsigned int bin{1};
+
+  for (unsigned int i{1}; i <= k; i++) {
+    bin = (bin * (n - i + 1)) / i;
+  }
+  return bin;
+}
+
+// TODO: template for different type of int
+// nthBell
+
+unsigned int nthBell(unsigned int n) {
+  unsigned int* BellList{new unsigned int[n + 1]{0}};
+
+  BellList[0] = 1;
+  for (unsigned int i = 1; i <= n; i++) {
+    for (unsigned int j = 0; j < i; j++) {
+
+      /*std::cout << "binomial(" << i << ", " << j << "): " << binomial(i,j) << std::endl;*/
+      BellList[i] += binomial(i - 1, j) * BellList[j];
+
+      /*std::cout << "i: " << i << " , j: " << j << '\t';*/
+      /*for (unsigned int i = 0; i < (n + 1); i++) {*/
+      /*  std::cout << BellList[i] << " ";*/
+      /*}*/
+      /*std::cout << std::endl;*/
+    }
+  }
+
+  return BellList[n];
+}
+
+// nexequ
 // It returns if the program reaches its end (`true` == exeuction finished`)
 
 bool nexequ(unsigned int* partition, unsigned int setSize) {
@@ -32,7 +69,6 @@ bool nexequ(unsigned int* partition, unsigned int setSize) {
       partition[i] = 0;
     }
   }
-
   return false;
 }
 
@@ -65,14 +101,19 @@ int main() {
     // Print partition
     std::cout << counter << ": \t";
     for (unsigned int i = 0; i < setSize; i++) {
-
       std::cout << "\033[3" << (partition[i] + 1) << "m" << "■" << ' ';
-      //std::cout << partition[i] << ' ';
+      // std::cout << partition[i] << ' ';
     }
     std::cout << "\033[37m" << std::endl;
 
     counter++;
   } while ((counter < 600) && !completed);
+
+  // Bell number
+  unsigned int input;
+  std::cout << "nth Bell number: " ;
+  std::cin >> input;
+  std::cout << nthBell(input) << std::endl;
 
   return 0;
 }
