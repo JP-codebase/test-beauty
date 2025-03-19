@@ -12,7 +12,7 @@ bool isSingleton(unsigned int index, unsigned int* partition) {
   return true;
 }
 
-// TODO: template for different type of int 
+// TODO: template for different type of int
 // Binomial coefficient
 
 unsigned int binomial(unsigned int n, unsigned int k) {
@@ -27,14 +27,14 @@ unsigned int binomial(unsigned int n, unsigned int k) {
 // TODO: template for different type of int
 // nthBell
 
-unsigned int nthBell(unsigned int n) {
+unsigned int Bell_number(unsigned int n) {
   unsigned int* BellList{new unsigned int[n + 1]{0}};
 
   BellList[0] = 1;
   for (unsigned int i = 1; i <= n; i++) {
     for (unsigned int j = 0; j < i; j++) {
-
-      /*std::cout << "binomial(" << i << ", " << j << "): " << binomial(i,j) << std::endl;*/
+      /*std::cout << "binomial(" << i << ", " << j << "): " << binomial(i,j) <<
+       * std::endl;*/
       BellList[i] += binomial(i - 1, j) * BellList[j];
 
       /*std::cout << "i: " << i << " , j: " << j << '\t';*/
@@ -95,10 +95,10 @@ int main() {
 
   unsigned int counter{1};
   bool completed{false};
-  do {
-    completed = nexequ(partition, setSize);
 
-    // Print partition
+  do {
+    // Print the previous partition
+
     std::cout << counter << ": \t";
     for (unsigned int i = 0; i < setSize; i++) {
       std::cout << "\033[3" << (partition[i] + 1) << "m" << "■" << ' ';
@@ -106,14 +106,14 @@ int main() {
     }
     std::cout << "\033[37m" << std::endl;
 
+    completed = nexequ(partition, setSize);
     counter++;
-  } while ((counter < 600) && !completed);
 
-  // Bell number
-  unsigned int input;
-  std::cout << "nth Bell number: " ;
-  std::cin >> input;
-  std::cout << nthBell(input) << std::endl;
+  } while ((counter < Bell_number(setSize) + 1) && !completed);
+
+  if (!completed)
+    std::cout << "Execution not completed. There's a bug somewhere."
+              << std::endl;
 
   return 0;
 }
