@@ -11,7 +11,6 @@ bool isSingleton(unsigned int index, unsigned int* partition) {
   return true;
 }
 
-// TODO : genereate only 1 element of the sequence
 // The function generates the next partition given the current
 // It returns if the program reaches its end (`true` == exeuction finished`)
 
@@ -66,9 +65,11 @@ int main() {
     // Print partition
     std::cout << counter << ": \t";
     for (unsigned int i = 0; i < setSize; i++) {
-      std::cout << partition[i] << ' ';
+
+      std::cout << "\033[3" << (partition[i] + 1) << "m" << "■" << ' ';
+      //std::cout << partition[i] << ' ';
     }
-    std::cout << std::endl;
+    std::cout << "\033[37m" << std::endl;
 
     counter++;
   } while ((counter < 600) && !completed);
