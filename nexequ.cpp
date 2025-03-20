@@ -104,13 +104,31 @@ void frequency_sequence(unsigned int* partition, unsigned int* fr_sequence,
 }
 
 // Frquency sequence knowing the frequency profile
-void frequency_sequence(unsigned int* partition, unsigned int* fr_profile, unsigned int* fr_sequence,
+void frequency_sequence(unsigned int* partition, unsigned int* fr_profile,
+                        unsigned int* fr_sequence,
                         unsigned int partition_size) {
   //
 
   for (unsigned int i = 0; i < partition_size; i++) {
     fr_sequence[i] = fr_profile[partition[i]];
   }
+}
+
+// Degeneracy profile
+void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
+                        unsigned int partition_size) {
+  for (unsigned int i = 0; i < partition_size; i++) {
+    dg_profile[i] = 0;
+  }
+
+  unsigned int* fr_profile{new unsigned int[partition_size]};
+  frequency_profile(partition, fr_profile, partition_size);
+
+  for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0) ; i++) {
+    dg_profile[fr_profile[i] - 1] += fr_profile[i];
+  }
+
+  delete[] fr_profile;
 }
 
 int main() {
@@ -152,17 +170,23 @@ int main() {
   /*}*/
   /*std::cout << std::endl;*/
 
+  // Declaration and inizialization of partition, fr_profile, fr_sequence and
+  // dg_sequence
   unsigned int* partition{new unsigned int[setSize]};
   unsigned int* fr_profile{new unsigned int[setSize]};
   unsigned int* fr_sequence{new unsigned int[setSize]};
+  unsigned int* dg_profile{new unsigned int[setSize]};
 
   for (unsigned int i = 0; i < setSize; i++) {
     partition[i] = 0;
-    fr_profile[i] = 0;
     fr_sequence[i] = setSize;
   }
-  fr_profile[0] = setSize;
 
+  frequency_profile(partition, fr_profile, setSize);
+  frequency_sequence(partition, fr_profile, fr_sequence, setSize);
+  degeneracy_profile(partition, dg_profile, setSize);
+
+  // Loop start
   unsigned int counter{1};
   bool completed{false};
   int spacing = std::log(setSize);  // Used to format output
@@ -192,9 +216,16 @@ int main() {
     /*std::cout << std::endl;*/
 
     // Print frequency sequence
-    std::cout << '\t' << "fr. sequence: ";
+    /*std::cout << '\t' << "fr. sequence: ";*/
+    /*for (unsigned int i = 0; i < setSize; i++) {*/
+    /*  std::cout << fr_sequence[i] << ' ';*/
+    /*}*/
+    /*std::cout << std::endl;*/
+
+    // Print degeneracy profile
+    std::cout << '\t' << "dg. profile : ";
     for (unsigned int i = 0; i < setSize; i++) {
-      std::cout << fr_sequence[i] << ' ';
+      std::cout << dg_profile[i] << ' ';
     }
     std::cout << std::endl;
 
@@ -209,6 +240,8 @@ int main() {
     frequency_profile(partition, fr_profile, setSize);
     /*frequency_sequence(partition, fr_sequence, setSize);*/
     frequency_sequence(partition, fr_profile, fr_sequence, setSize);
+    degeneracy_profile(partition, dg_profile, setSize);
+
     counter++;
 
   } while ((counter < Bell_number(setSize) + 1) && !completed);
@@ -220,6 +253,7 @@ int main() {
   delete[] partition;
   delete[] fr_profile;
   delete[] fr_sequence;
+  delete[] dg_profile;
 
   out_file.close();
 
