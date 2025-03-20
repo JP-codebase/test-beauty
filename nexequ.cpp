@@ -87,6 +87,32 @@ void frequency_profile(unsigned int* partition, unsigned int* fr_profile,
   }
 }
 
+// Frequency sequence
+
+// Frequency sequence without konwing the frequency profile
+void frequency_sequence(unsigned int* partition, unsigned int* fr_sequence,
+                        unsigned int partition_size) {
+  //
+  unsigned int* fr_profile{new unsigned int[partition_size]};
+  frequency_profile(partition, fr_profile, partition_size);
+
+  for (unsigned int i = 0; i < partition_size; i++) {
+    fr_sequence[i] = fr_profile[partition[i]];
+  }
+
+  delete[] fr_profile;
+}
+
+// Frquency sequence knowing the frequency profile
+void frequency_sequence(unsigned int* partition, unsigned int* fr_profile, unsigned int* fr_sequence,
+                        unsigned int partition_size) {
+  //
+
+  for (unsigned int i = 0; i < partition_size; i++) {
+    fr_sequence[i] = fr_profile[partition[i]];
+  }
+}
+
 int main() {
   unsigned int setSize{0};
   std::cout << "Insert set size: ";
@@ -128,10 +154,12 @@ int main() {
 
   unsigned int* partition{new unsigned int[setSize]};
   unsigned int* fr_profile{new unsigned int[setSize]};
+  unsigned int* fr_sequence{new unsigned int[setSize]};
 
   for (unsigned int i = 0; i < setSize; i++) {
     partition[i] = 0;
     fr_profile[i] = 0;
+    fr_sequence[i] = setSize;
   }
   fr_profile[0] = setSize;
 
@@ -157,9 +185,16 @@ int main() {
     std::cout << "\033[37m";
 
     // Print frequency profile
-    std::cout << '\t' << "fr. profile: ";
+    /*std::cout << '\t' << "fr. profile: ";*/
+    /*for (unsigned int i = 0; i < setSize; i++) {*/
+    /*  std::cout << fr_profile[i] << ' ';*/
+    /*}*/
+    /*std::cout << std::endl;*/
+
+    // Print frequency sequence
+    std::cout << '\t' << "fr. sequence: ";
     for (unsigned int i = 0; i < setSize; i++) {
-      std::cout << fr_profile[i] << ' ';
+      std::cout << fr_sequence[i] << ' ';
     }
     std::cout << std::endl;
 
@@ -172,6 +207,8 @@ int main() {
 
     completed = nexequ(partition, setSize);
     frequency_profile(partition, fr_profile, setSize);
+    /*frequency_sequence(partition, fr_sequence, setSize);*/
+    frequency_sequence(partition, fr_profile, fr_sequence, setSize);
     counter++;
 
   } while ((counter < Bell_number(setSize) + 1) && !completed);
@@ -179,6 +216,12 @@ int main() {
   if (!completed)
     std::cout << "Execution not completed. There's a bug somewhere."
               << std::endl;
+
+  delete[] partition;
+  delete[] fr_profile;
+  delete[] fr_sequence;
+
+  out_file.close();
 
   return 0;
 }
