@@ -1,18 +1,8 @@
+#include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <string>
-
-// isSingleton
-// Given an element in the `index` array cell, this function
-// checks if there exists an other element with index `j` such that
-// 0 <= `j` < `index` in the array
-
-bool isSingleton(unsigned int index, unsigned int* partition) {
-  for (unsigned int i = 1; i < index + 1; i++) {
-    if (partition[index - i] == partition[index]) return false;
-  }
-  return true;
-}
 
 // TODO: template for different type of int
 // Binomial coefficient
@@ -50,6 +40,18 @@ unsigned int Bell_number(unsigned int n) {
   return BellList[n];
 }
 
+// isSingleton
+// Given an element in the `index` array cell, this function
+// checks if there exists an other element with index `j` such that
+// 0 <= `j` < `index` in the array
+
+bool isSingleton(unsigned int index, unsigned int* partition) {
+  for (unsigned int i = 1; i < index + 1; i++) {
+    if (partition[index - i] == partition[index]) return false;
+  }
+  return true;
+}
+
 // nexequ
 // It returns if the program reaches its end (`true` == exeuction finished`)
 
@@ -74,6 +76,17 @@ bool nexequ(unsigned int* partition, unsigned int setSize) {
   return false;
 }
 
+void frequency_profile(unsigned int* partition, unsigned int* fr_profile,
+                       unsigned int partition_size) {
+  for (unsigned int i = 0; i < partition_size; i++) {
+    fr_profile[i] = 0;
+  }
+
+  for (unsigned int i = 0; i < partition_size; i++) {
+    fr_profile[partition[i]]++;
+  }
+}
+
 int main() {
   unsigned int setSize{0};
   std::cout << "Insert set size: ";
@@ -88,15 +101,17 @@ int main() {
   if (input != 'Y' && input != 'y') return 0;
 
   // Output to file
-  std::string filename = "./partitions/" + std::to_string(setSize) + "_set_partitions.txt";
+  std::string filename =
+      "./partitions/" + std::to_string(setSize) + "_set_partitions.txt";
 
+  // Output check
   {
-    std::ifstream out_file(filename);
-    if (out_file.good()) {
-      std::cerr << "Error: File already exists!\n";
-      return 1;
-    }
-    out_file.close();
+    /*std::ifstream out_file(filename);*/
+    /*if (out_file.good()) {*/
+    /*  std::cerr << "Error: File already exists!";*/
+    /*  return 1;*/
+    /*}*/
+    /*out_file.close();*/
   }
 
   std::ofstream out_file(filename, std::ios::app);
@@ -112,35 +127,51 @@ int main() {
   /*std::cout << std::endl;*/
 
   unsigned int* partition{new unsigned int[setSize]};
+  unsigned int* fr_profile{new unsigned int[setSize]};
 
   for (unsigned int i = 0; i < setSize; i++) {
     partition[i] = 0;
+    fr_profile[i] = 0;
   }
+  fr_profile[0] = setSize;
 
   unsigned int counter{1};
   bool completed{false};
+  int spacing = std::log(setSize);  // Used to format output
 
   do {
     // Print the previous partition
 
     // Print to console
-    std::cout << counter << ":     ";
+
+    // Print partition
+    std::cout << std::setw(spacing) << counter << ": \t";
+    /*std::cout << std::endl;*/
     for (unsigned int i = 0; i < setSize; i++) {
       std::cout << "\033[3" << (partition[i] + 1) << "m" << "■" << ' ';
+
+      /*if ((i % 3) == 0) std::cout << '\n';*/
+      /*std::cout << "\033[3" << (partition[i] + 1) << "m" << "█" << ' ';*/
       // std::cout << partition[i] << ' ';
     }
-    std::cout << "\033[37m" << std::endl;
+    std::cout << "\033[37m";
+
+    // Print frequency profile
+    std::cout << '\t' << "fr. profile: ";
+    for (unsigned int i = 0; i < setSize; i++) {
+      std::cout << fr_profile[i] << ' ';
+    }
+    std::cout << std::endl;
 
     // Print to file
-    out_file << counter << ": \t";
+    out_file << std::setw(spacing) << counter << "    ";
     for (unsigned int i = 0; i < setSize; i++) {
-      /*out_file << "\033[3" << (partition[i] + 1) << "m" << "■" << ' ';*/
       out_file << partition[i] << ' ';
     }
     out_file << '\n';
-    /*out_file << "\033[37m" << std::endl;*/
 
     completed = nexequ(partition, setSize);
+    frequency_profile(partition, fr_profile, setSize);
     counter++;
 
   } while ((counter < Bell_number(setSize) + 1) && !completed);
