@@ -1,4 +1,6 @@
+#include <fstream>
 #include <iostream>
+#include <string>
 
 // isSingleton
 // Given an element in the `index` array cell, this function
@@ -77,6 +79,28 @@ int main() {
   std::cout << "Insert set size: ";
   std::cin >> setSize;
 
+  std::cout << "You are going to generate " << Bell_number(setSize)
+            << " partitions. Do you want to continue [Y/n]?" << std::endl;
+
+  char input{};
+  std::cin >> input;
+
+  if (input != 'Y' && input != 'y') return 0;
+
+  // Output to file
+  std::string filename = "./partitions/" + std::to_string(setSize) + "_set_partitions.txt";
+
+  {
+    std::ifstream out_file(filename);
+    if (out_file.good()) {
+      std::cerr << "Error: File already exists!\n";
+      return 1;
+    }
+    out_file.close();
+  }
+
+  std::ofstream out_file(filename, std::ios::app);
+
   // Initial set composed of `setSize` distiguishable characters
 
   /*unsigned char* set {new unsigned char [setSize]};*/
@@ -99,12 +123,22 @@ int main() {
   do {
     // Print the previous partition
 
-    std::cout << counter << ": \t";
+    // Print to console
+    std::cout << counter << ":     ";
     for (unsigned int i = 0; i < setSize; i++) {
       std::cout << "\033[3" << (partition[i] + 1) << "m" << "■" << ' ';
       // std::cout << partition[i] << ' ';
     }
     std::cout << "\033[37m" << std::endl;
+
+    // Print to file
+    out_file << counter << ": \t";
+    for (unsigned int i = 0; i < setSize; i++) {
+      /*out_file << "\033[3" << (partition[i] + 1) << "m" << "■" << ' ';*/
+      out_file << partition[i] << ' ';
+    }
+    out_file << '\n';
+    /*out_file << "\033[37m" << std::endl;*/
 
     completed = nexequ(partition, setSize);
     counter++;
