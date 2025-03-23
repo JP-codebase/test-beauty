@@ -20,7 +20,7 @@ unsigned int binomial(unsigned int n, unsigned int k) {
 // nthBell
 
 unsigned int Bell_number(unsigned int n) {
-  unsigned int* BellList{new unsigned int[n + 1]{0}};
+  unsigned int *BellList{new unsigned int[n + 1]{0}};
 
   BellList[0] = 1;
   for (unsigned int i = 1; i <= n; i++) {
@@ -45,9 +45,10 @@ unsigned int Bell_number(unsigned int n) {
 // checks if there exists an other element with index `j` such that
 // 0 <= `j` < `index` in the array
 
-bool isSingleton(unsigned int index, unsigned int* partition) {
+bool isSingleton(unsigned int index, unsigned int *partition) {
   for (unsigned int i = 1; i < index + 1; i++) {
-    if (partition[index - i] == partition[index]) return false;
+    if (partition[index - i] == partition[index])
+      return false;
   }
   return true;
 }
@@ -55,14 +56,16 @@ bool isSingleton(unsigned int index, unsigned int* partition) {
 // nexequ
 // It returns if the program reaches its end (`true` == exeuction finished`)
 
-bool nexequ(unsigned int* partition, unsigned int setSize) {
+bool nexequ(unsigned int *partition, unsigned int setSize) {
   // 1: Find highest non singleton element `active`
   unsigned int active;
   for (active = setSize - 1; active >= 1; active--) {
-    if (!isSingleton(active, partition)) break;
+    if (!isSingleton(active, partition))
+      break;
   }
 
-  if (active == 0) return true;
+  if (active == 0)
+    return true;
 
   // 2: Move `active` to the next subset class
   partition[active]++;
@@ -76,7 +79,7 @@ bool nexequ(unsigned int* partition, unsigned int setSize) {
   return false;
 }
 
-void frequency_profile(unsigned int* partition, unsigned int* fr_profile,
+void frequency_profile(unsigned int *partition, unsigned int *fr_profile,
                        unsigned int partition_size) {
   for (unsigned int i = 0; i < partition_size; i++) {
     fr_profile[i] = 0;
@@ -90,10 +93,10 @@ void frequency_profile(unsigned int* partition, unsigned int* fr_profile,
 // Frequency sequence
 
 // Frequency sequence without konwing the frequency profile
-void frequency_sequence(unsigned int* partition, unsigned int* fr_sequence,
+void frequency_sequence(unsigned int *partition, unsigned int *fr_sequence,
                         unsigned int partition_size) {
   //
-  unsigned int* fr_profile{new unsigned int[partition_size]};
+  unsigned int *fr_profile{new unsigned int[partition_size]};
   frequency_profile(partition, fr_profile, partition_size);
 
   for (unsigned int i = 0; i < partition_size; i++) {
@@ -104,8 +107,8 @@ void frequency_sequence(unsigned int* partition, unsigned int* fr_sequence,
 }
 
 // Frquency sequence knowing the frequency profile
-void frequency_sequence(unsigned int* partition, unsigned int* fr_profile,
-                        unsigned int* fr_sequence,
+void frequency_sequence(unsigned int *partition, unsigned int *fr_profile,
+                        unsigned int *fr_sequence,
                         unsigned int partition_size) {
   //
 
@@ -116,13 +119,13 @@ void frequency_sequence(unsigned int* partition, unsigned int* fr_profile,
 
 // Degeneracy profile
 // Degeneracy profile without knowing the frequency profile
-void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
+void degeneracy_profile(unsigned int *partition, unsigned int *dg_profile,
                         unsigned int partition_size) {
   for (unsigned int i = 0; i < partition_size; i++) {
     dg_profile[i] = 0;
   }
 
-  unsigned int* fr_profile{new unsigned int[partition_size]};
+  unsigned int *fr_profile{new unsigned int[partition_size]};
   frequency_profile(partition, fr_profile, partition_size);
 
   for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0); i++) {
@@ -133,8 +136,8 @@ void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
 }
 
 // Degeneracy profile knowing the frequency profile
-void degeneracy_profile(unsigned int* partition, unsigned int* fr_profile, unsigned int* dg_profile,
-                        unsigned int partition_size) {
+void degeneracy_profile(unsigned int *partition, unsigned int *fr_profile,
+                        unsigned int *dg_profile, unsigned int partition_size) {
   for (unsigned int i = 0; i < partition_size; i++) {
     dg_profile[i] = 0;
   }
@@ -142,6 +145,80 @@ void degeneracy_profile(unsigned int* partition, unsigned int* fr_profile, unsig
   for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0); i++) {
     dg_profile[fr_profile[i] - 1] += fr_profile[i];
   }
+}
+
+// Resolution
+
+// Without knowing the degeneracy profile
+float resolution(unsigned int *partition, unsigned int partition_size) {
+  float res{0};
+
+  unsigned int *dg_profile{new unsigned int[partition_size]};
+  degeneracy_profile(partition, dg_profile, partition_size);
+
+  for (unsigned int i = 0; i < partition_size; i++) {
+    if (dg_profile[i] == 0)
+      continue;
+    res -= static_cast<float>((i + 1) * dg_profile[i]) /
+           static_cast<float>(partition_size) *
+           std::log(static_cast<float>(i + 1) /
+                    static_cast<float>(partition_size));
+  }
+
+  return res;
+}
+
+// Knowing the degeneracy profile
+float resolution_degeneracy(unsigned int *dg_profile,
+                            unsigned int dg_profile_size) {
+  float res{0};
+
+  for (unsigned int i = 0; i < dg_profile_size; i++) {
+    if (dg_profile[i] == 0)
+      continue;
+    res -= static_cast<float>((i + 1) * dg_profile[i]) /
+           static_cast<float>(dg_profile_size) *
+           std::log(static_cast<float>(i + 1) /
+                    static_cast<float>(dg_profile_size));
+  }
+
+  return res;
+}
+
+// Relevance
+
+// Without knowing the degeneracy profile
+float relevance(unsigned int *partition, unsigned int partition_size) {
+  float rel{0};
+
+  unsigned int *dg_profile{new unsigned int[partition_size]};
+  degeneracy_profile(partition, dg_profile, partition_size);
+
+  for (unsigned int i = 0; i < partition_size; i++) {
+    if (dg_profile[i] == 0)
+      continue;
+    rel -= (i + 1) * dg_profile[i] / static_cast<float>(partition_size)*
+           std::log(static_cast<float>((i + 1) * dg_profile[i]) /
+                    static_cast<float>(partition_size));
+  }
+
+  return rel;
+}
+
+// Knowing the degeneracy profile
+float relevance_degeneracy(unsigned int *dg_profile,
+                           unsigned int dg_profile_size) {
+  float rel{0};
+
+  for (unsigned int i = 0; i < dg_profile_size; i++) {
+    if (dg_profile[i] == 0)
+      continue;
+    rel -= (i + 1) * dg_profile[i] / static_cast<float>(dg_profile_size)*
+           std::log(static_cast<float>((i + 1) * dg_profile[i]) /
+                    static_cast<float>(dg_profile_size));
+  }
+
+  return rel;
 }
 
 int main() {
@@ -155,7 +232,8 @@ int main() {
   char input{};
   std::cin >> input;
 
-  if (input != 'Y' && input != 'y') return 0;
+  if (input != 'Y' && input != 'y')
+    return 0;
 
   // Output to file
   std::string filename =
@@ -185,10 +263,10 @@ int main() {
 
   // Declaration and inizialization of partition, fr_profile, fr_sequence and
   // dg_sequence
-  unsigned int* partition{new unsigned int[setSize]};
-  unsigned int* fr_profile{new unsigned int[setSize]};
-  unsigned int* fr_sequence{new unsigned int[setSize]};
-  unsigned int* dg_profile{new unsigned int[setSize]};
+  unsigned int *partition{new unsigned int[setSize]};
+  unsigned int *fr_profile{new unsigned int[setSize]};
+  unsigned int *fr_sequence{new unsigned int[setSize]};
+  unsigned int *dg_profile{new unsigned int[setSize]};
 
   for (unsigned int i = 0; i < setSize; i++) {
     partition[i] = 0;
@@ -199,17 +277,25 @@ int main() {
   frequency_sequence(partition, fr_profile, fr_sequence, setSize);
   degeneracy_profile(partition, dg_profile, setSize);
 
+  // Resolution
+  float res{resolution_degeneracy(dg_profile, setSize)};
+  float min_resolution[2]{1, res};
+  float max_resolution[2]{1, res};
+
+  // Relevance
+  float rel{relevance_degeneracy(dg_profile, setSize)};
+  float min_relevance[2]{1, rel};
+  float max_relevance[2]{1, rel};
+
   // Loop start
   unsigned int counter{1};
   bool completed{false};
-  int spacing = std::log(setSize);  // Used to format output
+  int spacing = std::log(setSize); // Used to format output
 
   do {
     // Print the previous partition
 
-    // Print to console
-
-    // Print partition
+    // Print partition to console
     std::cout << std::setw(spacing) << counter << ": \t";
     /*std::cout << std::endl;*/
     for (unsigned int i = 0; i < setSize; i++) {
@@ -240,6 +326,13 @@ int main() {
     for (unsigned int i = 0; i < setSize; i++) {
       std::cout << dg_profile[i] << ' ';
     }
+
+    // Print resolution
+    /*std::cout << '\t' << "resolution : " << res;*/
+    
+    // Print relevance
+    std::cout << '\t' << "relevance : " << rel;
+
     std::cout << std::endl;
 
     // Print to file
@@ -256,13 +349,52 @@ int main() {
     /*degeneracy_profile(partition, dg_profile, setSize);*/
     degeneracy_profile(partition, fr_profile, dg_profile, setSize);
 
+    res = resolution_degeneracy(dg_profile, setSize);
+    rel = relevance_degeneracy(dg_profile, setSize);
+
     counter++;
+
+    if (res < min_resolution[1]) {
+      min_resolution[0] = counter;
+      min_resolution[1] = res;
+    } else if (res > max_resolution[1]) {
+      max_resolution[0] = counter;
+      max_resolution[1] = res;
+    }
+
+    if (rel < min_relevance[1]) {
+      min_relevance[0] = counter;
+      min_relevance[1] = rel;
+    } else if (rel > max_relevance[1]) {
+      max_relevance[0] = counter;
+      max_relevance[1] = rel;
+    }
 
   } while ((counter < Bell_number(setSize) + 1) && !completed);
 
   if (!completed)
     std::cout << "Execution not completed. There's a bug somewhere."
               << std::endl;
+
+  std::cout << "---------" << std::endl;
+  std::cout << std::setw(20) << "Min resolution : " << std::setw(10)
+            << min_resolution[1] << std::setw(20) << std::setw(20)
+            << "position : " << std::setw(10) << min_resolution[0]
+            << std::endl;
+  std::cout << std::setw(20) << "Max resolution : " << std::setw(10)
+            << max_resolution[1] << std::setw(20)
+            << "position : " << std::setw(10) << max_resolution[0]
+            << std::endl;
+
+  std::cout << "---------" << std::endl;
+  std::cout << std::setw(20) << "Min relevance : " << std::setw(10)
+            << min_relevance[1] << std::setw(20) << std::setw(20)
+            << "position : " << std::setw(10) << min_relevance[0]
+            << std::endl;
+  std::cout << std::setw(20) << "Max relevance : " << std::setw(10)
+            << max_relevance[1] << std::setw(20)
+            << "position : " << std::setw(10) << max_relevance[0]
+            << std::endl;
 
   delete[] partition;
   delete[] fr_profile;
