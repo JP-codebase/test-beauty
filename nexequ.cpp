@@ -165,6 +165,8 @@ float resolution(unsigned int *partition, unsigned int partition_size) {
                     static_cast<float>(partition_size));
   }
 
+  delete [] dg_profile;
+
   return res;
 }
 
@@ -201,6 +203,8 @@ float relevance(unsigned int *partition, unsigned int partition_size) {
            std::log(static_cast<float>((i + 1) * dg_profile[i]) /
                     static_cast<float>(partition_size));
   }
+
+  delete [] dg_profile;
 
   return rel;
 }
