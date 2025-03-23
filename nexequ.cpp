@@ -115,6 +115,7 @@ void frequency_sequence(unsigned int* partition, unsigned int* fr_profile,
 }
 
 // Degeneracy profile
+// Degeneracy profile without knowing the frequency profile
 void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
                         unsigned int partition_size) {
   for (unsigned int i = 0; i < partition_size; i++) {
@@ -124,11 +125,23 @@ void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
   unsigned int* fr_profile{new unsigned int[partition_size]};
   frequency_profile(partition, fr_profile, partition_size);
 
-  for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0) ; i++) {
+  for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0); i++) {
     dg_profile[fr_profile[i] - 1] += fr_profile[i];
   }
 
   delete[] fr_profile;
+}
+
+// Degeneracy profile knowing the frequency profile
+void degeneracy_profile(unsigned int* partition, unsigned int* fr_profile, unsigned int* dg_profile,
+                        unsigned int partition_size) {
+  for (unsigned int i = 0; i < partition_size; i++) {
+    dg_profile[i] = 0;
+  }
+
+  for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0); i++) {
+    dg_profile[fr_profile[i] - 1] += fr_profile[i];
+  }
 }
 
 int main() {
@@ -206,7 +219,7 @@ int main() {
       /*std::cout << "\033[3" << (partition[i] + 1) << "m" << "█" << ' ';*/
       // std::cout << partition[i] << ' ';
     }
-    std::cout << "\033[37m";
+    std::cout << "\033[30m";
 
     // Print frequency profile
     /*std::cout << '\t' << "fr. profile: ";*/
@@ -240,7 +253,8 @@ int main() {
     frequency_profile(partition, fr_profile, setSize);
     /*frequency_sequence(partition, fr_sequence, setSize);*/
     frequency_sequence(partition, fr_profile, fr_sequence, setSize);
-    degeneracy_profile(partition, dg_profile, setSize);
+    /*degeneracy_profile(partition, dg_profile, setSize);*/
+    degeneracy_profile(partition, fr_profile, dg_profile, setSize);
 
     counter++;
 
