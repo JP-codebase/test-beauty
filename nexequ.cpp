@@ -129,7 +129,7 @@ void degeneracy_profile(unsigned int *partition, unsigned int *dg_profile,
   frequency_profile(partition, fr_profile, partition_size);
 
   for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0); i++) {
-    dg_profile[fr_profile[i] - 1] += fr_profile[i];
+    dg_profile[fr_profile[i] - 1]++;
   }
 
   delete[] fr_profile;
@@ -143,7 +143,7 @@ void degeneracy_profile(unsigned int *partition, unsigned int *fr_profile,
   }
 
   for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0); i++) {
-    dg_profile[fr_profile[i] - 1] += fr_profile[i];
+    dg_profile[fr_profile[i] - 1]++;
   }
 }
 
