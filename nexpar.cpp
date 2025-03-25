@@ -54,20 +54,16 @@ bool nexpar(unsigned int *partition, unsigned int partition_size) {
   return false;
 }
 
-// Degeneracy profile without knowing the frequency profile
+// Degeneracy profile
 void degeneracy_profile(unsigned int *partition, unsigned int *dg_profile,
                         unsigned int partition_size) {
   for (unsigned int i = 0; i < partition_size; i++) {
     dg_profile[i] = 0;
   }
 
-  unsigned int *fr_profile{new unsigned int[partition_size]};
-
-  for (unsigned int i = 0; (i < partition_size) && (fr_profile[i] != 0); i++) {
-    dg_profile[fr_profile[i] - 1]++;
+  for (unsigned int i = 0; (i < partition_size) && (partition[i] != 0); i++) {
+    dg_profile[partition[i] - 1]++;
   }
-
-  delete[] fr_profile;
 }
 
 // Resolution
@@ -172,21 +168,17 @@ int main() {
     partition[i] = 0;
   }
 
-  /*for (unsigned int i{0}; i < n; i++) {*/
-  /*  partition[i] = 1;*/
-  /*}*/
-
-  /*degeneracy_profile(partition, dg_profile, n);*/
+  degeneracy_profile(partition, dg_profile, n);
 
   // Resolution
-  /*float res{resolution_degeneracy(dg_profile, n)};*/
-  /*float min_resolution[2]{1, res};*/
-  /*float max_resolution[2]{1, res};*/
+  float res{resolution_degeneracy(dg_profile, n)};
+  float min_resolution[2]{1, res};
+  float max_resolution[2]{1, res};
 
   // Relevance
-  /*float rel{relevance_degeneracy(dg_profile, n)};*/
-  /*float min_relevance[2]{1, rel};*/
-  /*float max_relevance[2]{1, rel};*/
+  float rel{relevance_degeneracy(dg_profile, n)};
+  float min_relevance[2]{1, rel};
+  float max_relevance[2]{1, rel};
 
   bool completed{false};
   unsigned int counter{1};
@@ -201,30 +193,60 @@ int main() {
     }
 
     // Print degeneracy profile
-    /*std::cout << '\t' << "dg. profile : ";*/
-    /*for (unsigned int i = 0; i < n; i++) {*/
-    /*  std::cout << dg_profile[i] << ' ';*/
-    /*}*/
+    std::cout << '\t' << "dg. : ";
+    for (unsigned int i = 0; i < n; i++) {
+      std::cout << std::setw(width) << dg_profile[i] << ' ';
+    }
 
     // Print resolution
-    /*std::cout << '\t' << "resolution : " << res;*/
+    std::cout << '\t' << "res : " << res;
 
     // Print relevance
-    /*std::cout << '\t' << "relevance : " << rel;*/
+    std::cout << '\t' << "rel : " << rel;
 
     std::cout << std::endl;
 
     completed = nexpar(partition, n);
-    /*degeneracy_profile(partition, dg_profile, n);*/
-    /*degeneracy_profile(partition, fr_profile, dg_profile, n);*/
+    degeneracy_profile(partition, dg_profile, n);
 
-    /*res = resolution_degeneracy(dg_profile, n);*/
-    /*rel = relevance_degeneracy(dg_profile, n);*/
+    res = resolution_degeneracy(dg_profile, n);
+    rel = relevance_degeneracy(dg_profile, n);
 
     counter++;
+
+    if (res < min_resolution[1]) {
+      min_resolution[0] = counter;
+      min_resolution[1] = res;
+    } else if (res > max_resolution[1]) {
+      max_resolution[0] = counter;
+      max_resolution[1] = res;
+    }
+
+    if (rel < min_relevance[1]) {
+      min_relevance[0] = counter;
+      min_relevance[1] = rel;
+    } else if (rel > max_relevance[1]) {
+      max_relevance[0] = counter;
+      max_relevance[1] = rel;
+    }
   } while (!completed);
 
   std::cout << "----------------------------" << std::endl;
+
+  std::cout << std::setw(20) << "Min resolution : " << std::setw(10)
+            << min_resolution[1] << std::setw(20) << std::setw(20)
+            << "position : " << std::setw(10) << min_resolution[0] << std::endl;
+  std::cout << std::setw(20) << "Max resolution : " << std::setw(10)
+            << max_resolution[1] << std::setw(20)
+            << "position : " << std::setw(10) << max_resolution[0] << std::endl;
+
+  std::cout << "---------" << std::endl;
+  std::cout << std::setw(20) << "Min relevance : " << std::setw(10)
+            << min_relevance[1] << std::setw(20) << std::setw(20)
+            << "position : " << std::setw(10) << min_relevance[0] << std::endl;
+  std::cout << std::setw(20) << "Max relevance : " << std::setw(10)
+            << max_relevance[1] << std::setw(20)
+            << "position : " << std::setw(10) << max_relevance[0] << std::endl;
 
   delete[] partition;
   delete[] dg_profile;
