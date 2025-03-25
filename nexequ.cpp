@@ -305,7 +305,8 @@ int main() {
       /*std::cout << "\033[3" << (partition[i] + 1) << "m" << "█" << ' ';*/
       // std::cout << partition[i] << ' ';
     }
-    std::cout << "\033[30m";
+    std::cout << "\033[37m"; // White text
+    /*std::cout << "\033[30m";*/ // Black text
 
     // Print frequency profile
     /*std::cout << '\t' << "fr. profile: ";*/
