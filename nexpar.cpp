@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 const double pi{std::acos(-1.0)};
@@ -152,8 +153,30 @@ float relevance_degeneracy(unsigned int *dg_profile,
   return rel;
 }
 
+// Print partition to a file, buffered
+void print_partition_to_file_buffered(unsigned int *partition,
+                            unsigned int partition_size, std::ofstream &file,
+                            std::string &buffer,
+                            unsigned int buffer_limit = 1024) {
+
+  std::ostringstream oss;
+
+  for (unsigned int i{0}; i < partition_size; i++) {
+    oss << partition[i] << ' ';
+  }
+  oss << '\n';
+
+  buffer += oss.str();
+
+  if (buffer.size() >= buffer_limit) {
+    file << buffer;
+    buffer.clear();
+  }
+}
+
 int main() {
 
+  // Input
   unsigned int n;
   std::cout << "Insert an integer > 0: ";
   std::cin >> n;
@@ -169,6 +192,7 @@ int main() {
   if (input != 'Y' && input != 'y')
     return 0;
 
+  // Declaration and initialization of the important variables
   unsigned int *partition{new unsigned int[n]};
   unsigned int *dg_profile{new unsigned int[n]};
 
@@ -196,6 +220,29 @@ int main() {
       static_cast<unsigned int>(std::ceil(std::log10(static_cast<double>(n)))) +
       1};
 
+  // Output to file
+  std::string filename =
+      "./partitions/partitions_of_" + std::to_string(n) + ".txt";
+
+  // Output check
+  {
+    /*std::ifstream out_file(filename);*/
+    /*if (out_file.good()) {*/
+    /*  std::cerr << "Error: File already exists!";*/
+    /*  return 1;*/
+    /*}*/
+    /*out_file.close();*/
+  }
+
+  std::ofstream out_file(filename);
+
+  if (!out_file) {
+    std::cerr << "Error: Could not open file for writing." << std::endl;
+    return 1;
+  }
+  std::string buffer;
+  unsigned int buffer_limit = 128;
+
   // Time
   auto start = std::chrono::steady_clock::now();
   auto time_step1 = start;
@@ -222,6 +269,11 @@ int main() {
       status_bar++;
     }
 
+    // Print to file
+    /*print_partition_to_file_buffered(partition, n, out_file, buffer, buffer_limit);*/
+    out_file << res << ' ' << rel << '\n';
+
+    // Print to terminal
     /*std::cout << counter << " :\t";*/
     /*for (unsigned int i{0}; i < n; i++) {*/
     /*  std::cout << std::setw(width) << partition[i] << ' ';*/
@@ -265,6 +317,11 @@ int main() {
       max_relevance[1] = rel;
     }
   } while (!completed);
+
+  if (!buffer.empty()) {
+    out_file << buffer;
+    buffer.clear();
+  }
 
   // Execution time
   time_step1 = std::chrono::steady_clock::now();
