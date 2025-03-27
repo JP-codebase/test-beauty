@@ -284,19 +284,19 @@ int main() {
     if (counter > (status_bar * ten_percent)) {
       time_step1 = std::chrono::steady_clock::now();
       std::cout << status_bar << "0% : "
-                << ((std::chrono::duration_cast<std::chrono::milliseconds>(
+                << ((std::chrono::duration_cast<std::chrono::microseconds>(
                          (time_step1 - time_step2)))
                         .count()) /
-                       1000.0
+                       1000000.0
                 << " seconds" << std::endl;
       time_step2 = time_step1;
       status_bar++;
     }
 
     // Print to file
-    print_partition_to_file_buffered(partition, n, out_file_partitions_txt,
-                                     buffer, buffer_limit);
-    out_file_resrel_txt << res << ' ' << rel << '\n';
+    /*print_partition_to_file_buffered(partition, n, out_file_partitions_txt,*/
+    /*                                 buffer, buffer_limit);*/
+    /*out_file_resrel_txt << res << ' ' << rel << '\n';*/
 
     out_file_partitions_bin.write(reinterpret_cast<const char *>(partition),
                        sizeof(unsigned int));
@@ -356,17 +356,17 @@ int main() {
   // Execution time
   time_step1 = std::chrono::steady_clock::now();
   std::cout << "100% : "
-            << ((std::chrono::duration_cast<std::chrono::milliseconds>(
+            << ((std::chrono::duration_cast<std::chrono::microseconds>(
                      (time_step1 - time_step2)))
                     .count()) /
-                   1000.0
+                   1000000.0
             << " seconds" << std::endl;
 
   std::cout << "Execution time : "
-            << ((std::chrono::duration_cast<std::chrono::milliseconds>(
+            << ((std::chrono::duration_cast<std::chrono::microseconds>(
                      (time_step1 - start)))
                     .count()) /
-                   1000.0
+                   1000000.0
             << " seconds" << std::endl;
 
   std::cout << std::endl;
