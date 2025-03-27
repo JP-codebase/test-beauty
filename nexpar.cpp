@@ -299,7 +299,7 @@ int main() {
     /*out_file_resrel_txt << res << ' ' << rel << '\n';*/
 
     out_file_partitions_bin.write(reinterpret_cast<const char *>(partition),
-                       sizeof(unsigned int));
+                       sizeof(unsigned int) * n);
     out_file_resrel_bin.write(reinterpret_cast<const char *>(&res), sizeof(res));
     out_file_resrel_bin.write(reinterpret_cast<const char *>(&rel), sizeof(rel));
 
