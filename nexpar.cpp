@@ -153,11 +153,11 @@ float relevance_degeneracy(unsigned int *dg_profile,
   return rel;
 }
 
-// Print partition to a file, buffered
+// Print to file, buffered plain text
 void print_partition_to_file_buffered(unsigned int *partition,
-                            unsigned int partition_size, std::ofstream &file,
-                            std::string &buffer,
-                            unsigned int buffer_limit = 1024) {
+                                      unsigned int partition_size,
+                                      std::ofstream &file, std::string &buffer,
+                                      unsigned int buffer_limit = 1024) {
 
   std::ostringstream oss;
 
@@ -173,6 +173,11 @@ void print_partition_to_file_buffered(unsigned int *partition,
     buffer.clear();
   }
 }
+
+// Print to file, binary
+void print_parition_to_file_binary(unsigned int *partition,
+                                   unsigned int partition_size,
+                                   std::ofstream &file) {}
 
 int main() {
 
@@ -221,9 +226,7 @@ int main() {
       1};
 
   // Output to file
-  std::string filename =
-      "./partitions/partitions_of_" + std::to_string(n) + ".txt";
-
+  std::string filename = "./partitions/partitions_of_" + std::to_string(n);
   // Output check
   {
     /*std::ifstream out_file(filename);*/
@@ -234,12 +237,33 @@ int main() {
     /*out_file.close();*/
   }
 
-  std::ofstream out_file(filename);
+  std::ofstream out_file_partitions_txt(filename + ".txt");
+  std::ofstream out_file_resrel_txt(filename + "_resrel.txt");
+  std::ofstream out_file_partitions_bin(filename + ".bin", std::ios::binary);
+  std::ofstream out_file_resrel_bin(filename + "_resrel.bin", std::ios::binary);
 
-  if (!out_file) {
-    std::cerr << "Error: Could not open file for writing." << std::endl;
+  if (!out_file_partitions_txt) {
+    std::cerr << "Error: Could not open " << filename << ".txt"
+              << " for writing." << std::endl;
     return 1;
   }
+  if (!out_file_resrel_txt) {
+    std::cerr << "Error: Could not open file " << filename << "_resrel.txt"
+              << " for writing." << std::endl;
+    return 1;
+  }
+  if (!out_file_partitions_bin) {
+    std::cerr << "Error: Could not open file " << filename << ".bin"
+              << " for writing." << std::endl;
+    return 1;
+  }
+  if (!out_file_resrel_bin) {
+    std::cerr << "Error: Could not open file " << filename << "_resrel.bin"
+              << " for writing." << std::endl;
+    return 1;
+  }
+
+  // Buffer
   std::string buffer;
   unsigned int buffer_limit = 128;
 
@@ -270,8 +294,14 @@ int main() {
     }
 
     // Print to file
-    /*print_partition_to_file_buffered(partition, n, out_file, buffer, buffer_limit);*/
-    out_file << res << ' ' << rel << '\n';
+    print_partition_to_file_buffered(partition, n, out_file_partitions_txt,
+                                     buffer, buffer_limit);
+    out_file_resrel_txt << res << ' ' << rel << '\n';
+
+    out_file_partitions_bin.write(reinterpret_cast<const char *>(partition),
+                       sizeof(unsigned int));
+    out_file_resrel_bin.write(reinterpret_cast<const char *>(&res), sizeof(res));
+    out_file_resrel_bin.write(reinterpret_cast<const char *>(&rel), sizeof(rel));
 
     // Print to terminal
     /*std::cout << counter << " :\t";*/
@@ -319,7 +349,7 @@ int main() {
   } while (!completed);
 
   if (!buffer.empty()) {
-    out_file << buffer;
+    out_file_partitions_txt << buffer;
     buffer.clear();
   }
 
@@ -357,6 +387,11 @@ int main() {
   std::cout << std::setw(20) << "Max relevance : " << std::setw(10)
             << max_relevance[1] << std::setw(20)
             << "position : " << std::setw(10) << max_relevance[0] << std::endl;
+
+  out_file_partitions_txt.close();
+  out_file_resrel_txt.close();
+  out_file_partitions_bin.close();
+  out_file_resrel_bin.close();
 
   delete[] partition;
   delete[] dg_profile;
