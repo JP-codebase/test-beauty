@@ -3,7 +3,6 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
 #include <string>
 
 const double pi{std::acos(-1.0)};
@@ -119,7 +118,11 @@ float relevance_degeneracy(unsigned int *dg_profile,
 int main() {
 
   // Input
-  const unsigned int n{81};
+  /*const unsigned int n{81};*/
+
+  unsigned int n;
+  std::cout << "Integer : ";
+  std::cin >> n;
 
   const double number_of_partitions{number_partition_n(n)};
   std::cout << "You are going to generate approximately "
