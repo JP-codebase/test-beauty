@@ -4,7 +4,7 @@
 
 int main() {
 
-  unsigned int n{10};
+  unsigned int n{17};
 
   std::string in_filename{"./partitions/partitions_of_" + std::to_string(n) +
                           ".bin"};

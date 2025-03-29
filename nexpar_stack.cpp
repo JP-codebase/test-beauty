@@ -23,40 +23,41 @@ bool nexpar(unsigned int *partition, unsigned int partition_size) {
   if (partition[0] == 1)
     return true;
 
-  unsigned int active_position;
+  unsigned int *active_position_ptr;
   unsigned int sum{0};
 
-  for (active_position = 0; active_position < partition_size - 1;
-       active_position++) {
-    if ((partition[active_position + 1] == 1) ||
-        (partition[active_position + 1] == 0))
+  for (active_position_ptr = partition;
+       active_position_ptr != (partition + partition_size - 1);
+       active_position_ptr++) {
+
+    if ((*(active_position_ptr + 1) == 1) || (*(active_position_ptr + 1) == 0))
       break;
-    sum += partition[active_position];
+    sum += *active_position_ptr;
   }
 
-  partition[active_position]--;
-  sum += partition[active_position];
+  *active_position_ptr -= 1;
+  sum += *active_position_ptr;
 
-  unsigned int quotient{(partition_size - sum) / partition[active_position]};
+  unsigned int quotient{(partition_size - sum) / *active_position_ptr};
   unsigned int remainder{(partition_size - sum) -
-                         quotient * partition[active_position]};
+                         quotient * *active_position_ptr};
 
-  for (unsigned int i = active_position + 1;
-       i < (active_position + 1 + quotient); i++) {
-    partition[i] = partition[active_position];
+  for (unsigned int *ptr{active_position_ptr + 1};
+       ptr != (active_position_ptr + 1 + quotient); ptr++) {
+    *ptr = *active_position_ptr;
   }
 
   if (remainder != 0) {
-    partition[active_position + 1 + quotient] = remainder;
+    *(active_position_ptr + 1 + quotient) = remainder;
 
-    for (unsigned int i = active_position + 2 + quotient; i < partition_size;
-         i++) {
-      partition[i] = 0;
+    for (unsigned int *ptr{active_position_ptr + 2 + quotient};
+         ptr != (partition + partition_size); ptr++) {
+      *ptr = 0;
     }
   } else {
-    for (unsigned int i = active_position + 1 + quotient; i < partition_size;
-         i++) {
-      partition[i] = 0;
+    for (unsigned int *ptr{active_position_ptr + 1 + quotient};
+         ptr != (partition + partition_size); ptr++) {
+      *ptr = 0;
     }
   }
 
@@ -66,37 +67,19 @@ bool nexpar(unsigned int *partition, unsigned int partition_size) {
 // Degeneracy profile
 void degeneracy_profile(unsigned int *partition, unsigned int *dg_profile,
                         unsigned int partition_size) {
-  for (unsigned int i = 0; i < partition_size; i++) {
-    dg_profile[i] = 0;
+
+  for (unsigned int *ptr{dg_profile}; ptr != (dg_profile + partition_size);
+       ptr++) {
+    *ptr = 0;
   }
 
-  for (unsigned int i = 0; (i < partition_size) && (partition[i] != 0); i++) {
-    dg_profile[partition[i] - 1]++;
+  for (unsigned int *ptr{partition};
+       (ptr != (partition + partition_size)) && (*ptr != 0); ptr++) {
+    dg_profile[*ptr - 1]++;
   }
 }
 
 // Resolution
-
-// Without knowing the degeneracy profile
-float resolution(unsigned int *partition, unsigned int partition_size) {
-  float res{0};
-
-  unsigned int *dg_profile{new unsigned int[partition_size]};
-  degeneracy_profile(partition, dg_profile, partition_size);
-
-  for (unsigned int i = 0; i < partition_size; i++) {
-    if (dg_profile[i] == 0)
-      continue;
-    res -= static_cast<float>((i + 1) * dg_profile[i]) /
-           static_cast<float>(partition_size) *
-           std::log(static_cast<float>(i + 1) /
-                    static_cast<float>(partition_size));
-  }
-
-  delete[] dg_profile;
-
-  return res;
-}
 
 // Knowing the degeneracy profile
 float resolution_degeneracy(unsigned int *dg_profile,
@@ -117,26 +100,6 @@ float resolution_degeneracy(unsigned int *dg_profile,
 
 // Relevance
 
-// Without knowing the degeneracy profile
-float relevance(unsigned int *partition, unsigned int partition_size) {
-  float rel{0};
-
-  unsigned int *dg_profile{new unsigned int[partition_size]};
-  degeneracy_profile(partition, dg_profile, partition_size);
-
-  for (unsigned int i = 0; i < partition_size; i++) {
-    if (dg_profile[i] == 0)
-      continue;
-    rel -= (i + 1) * dg_profile[i] / static_cast<float>(partition_size) *
-           std::log(static_cast<float>((i + 1) * dg_profile[i]) /
-                    static_cast<float>(partition_size));
-  }
-
-  delete[] dg_profile;
-
-  return rel;
-}
-
 // Knowing the degeneracy profile
 float relevance_degeneracy(unsigned int *dg_profile,
                            unsigned int dg_profile_size) {
@@ -153,38 +116,10 @@ float relevance_degeneracy(unsigned int *dg_profile,
   return rel;
 }
 
-// Print to file, buffered plain text
-void print_partition_to_file_buffered(unsigned int *partition,
-                                      unsigned int partition_size,
-                                      std::ofstream &file, std::string &buffer,
-                                      unsigned int buffer_limit = 1024) {
-
-  std::ostringstream oss;
-
-  for (unsigned int i{0}; i < partition_size; i++) {
-    oss << partition[i] << ' ';
-  }
-  oss << '\n';
-
-  buffer += oss.str();
-
-  if (buffer.size() >= buffer_limit) {
-    file << buffer;
-    buffer.clear();
-  }
-}
-
-// Print to file, binary
-void print_parition_to_file_binary(unsigned int *partition,
-                                   unsigned int partition_size,
-                                   std::ofstream &file) {}
-
 int main() {
 
   // Input
-  unsigned int n;
-  std::cout << "Insert an integer > 0: ";
-  std::cin >> n;
+  const unsigned int n{81};
 
   const double number_of_partitions{number_partition_n(n)};
   std::cout << "You are going to generate approximately "
@@ -198,12 +133,15 @@ int main() {
     return 0;
 
   // Declaration and initialization of the important variables
+  /*unsigned int partition[n];*/
+  /*unsigned int dg_profile[n];*/
+
   unsigned int *partition{new unsigned int[n]};
   unsigned int *dg_profile{new unsigned int[n]};
 
-  partition[0] = n;
-  for (unsigned int i{1}; i < n; i++) {
-    partition[i] = 0;
+  *partition = n;
+  for (unsigned int *ptr{partition + 1}; ptr != (partition + n); ptr++) {
+    *ptr = 0;
   }
 
   degeneracy_profile(partition, dg_profile, n);
@@ -227,24 +165,6 @@ int main() {
 
   // Output to file
   std::string filename = "./partitions/partitions_of_" + std::to_string(n);
-
-  // txt output
-  /*std::ofstream out_file_partitions_txt(filename + ".txt");*/
-  /*std::ofstream out_file_resrel_txt(filename + "_resrel.txt");*/
-  /*if (!out_file_partitions_txt) {*/
-  /*  std::cerr << "Error: Could not open " << filename << ".txt"*/
-  /*            << " for writing." << std::endl;*/
-  /*  return 1;*/
-  /*}*/
-  /*if (!out_file_resrel_txt) {*/
-  /*  std::cerr << "Error: Could not open file " << filename << "_resrel.txt"*/
-  /*            << " for writing." << std::endl;*/
-  /*  return 1;*/
-  /*}*/
-
-  // Buffer
-  /*std::string buffer;*/
-  /*unsigned int buffer_limit = 128;*/
 
   // Binary output
   std::ofstream out_file_partitions_bin(filename + ".bin", std::ios::binary);
@@ -288,11 +208,6 @@ int main() {
     }
 
     // Print to file
-
-    // txt
-    /*print_partition_to_file_buffered(partition, n, out_file_partitions_txt,*/
-    /*                                buffer, buffer_limit);*/
-    /*out_file_resrel_txt << res << ' ' << rel << '\n';*/
 
     // Binary
     out_file_partitions_bin.write(reinterpret_cast<const char *>(partition),
@@ -347,12 +262,6 @@ int main() {
     }
   } while (!completed);
 
-  // Empty the buffer
-  /*if (!buffer.empty()) {*/
-  /*  out_file_partitions_txt << buffer;*/
-  /*  buffer.clear();*/
-  /*}*/
-
   // Execution time
   time_step1 = std::chrono::steady_clock::now();
   std::cout << "100% : "
@@ -388,13 +297,8 @@ int main() {
             << max_relevance[1] << std::setw(20)
             << "position : " << std::setw(10) << max_relevance[0] << std::endl;
 
-  /*out_file_partitions_txt.close();*/
-  /*out_file_resrel_txt.close();*/
   out_file_partitions_bin.close();
   out_file_resrel_bin.close();
-
-  delete[] partition;
-  delete[] dg_profile;
 
   return 0;
 }
