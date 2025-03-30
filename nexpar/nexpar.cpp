@@ -179,7 +179,7 @@ int main() {
 
     /*std::cout << std::endl;*/
 
-    completed = nexpar(partition, n);
+    completed = nexpar_ptr(partition, n);
     degeneracy_profile(partition, dg_profile, n);
 
     res = resolution_degeneracy(dg_profile, n);
