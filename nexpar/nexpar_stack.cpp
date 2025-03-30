@@ -4,63 +4,13 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include "nexpar_functions.h"
 
 const double pi{std::acos(-1.0)};
 
 // Number of partition of the integer n
 double number_partition_n(unsigned int n) {
   return std::exp(pi * std::sqrt(2.0L * n / 3.0L)) / (4 * n * std::sqrt(3.0L));
-}
-
-// nexpar
-// It returns true if the program reaches its end (`true` == exeuction
-// finished`)
-
-bool nexpar(unsigned int *partition, unsigned int partition_size) {
-
-  // Find active position
-  if (partition[0] == 1)
-    return true;
-
-  unsigned int *active_position_ptr;
-  unsigned int sum{0};
-
-  for (active_position_ptr = partition;
-       active_position_ptr != (partition + partition_size - 1);
-       active_position_ptr++) {
-
-    if ((*(active_position_ptr + 1) == 1) || (*(active_position_ptr + 1) == 0))
-      break;
-    sum += *active_position_ptr;
-  }
-
-  *active_position_ptr -= 1;
-  sum += *active_position_ptr;
-
-  unsigned int quotient{(partition_size - sum) / *active_position_ptr};
-  unsigned int remainder{(partition_size - sum) -
-                         quotient * *active_position_ptr};
-
-  for (unsigned int *ptr{active_position_ptr + 1};
-       ptr != (active_position_ptr + 1 + quotient); ptr++) {
-    *ptr = *active_position_ptr;
-  }
-
-  if (remainder != 0) {
-    *(active_position_ptr + 1 + quotient) = remainder;
-
-    for (unsigned int *ptr{active_position_ptr + 2 + quotient};
-         ptr != (partition + partition_size); ptr++) {
-      *ptr = 0;
-    }
-  } else {
-    for (unsigned int *ptr{active_position_ptr + 1 + quotient};
-         ptr != (partition + partition_size); ptr++) {
-      *ptr = 0;
-    }
-  }
-
-  return false;
 }
 
 // Degeneracy profile
@@ -240,7 +190,7 @@ int main() {
 
     /*std::cout << std::endl;*/
 
-    completed = nexpar(partition, n);
+    completed = nexpar_ptr(partition, n);
     degeneracy_profile(partition, dg_profile, n);
 
     res = resolution_degeneracy(dg_profile, n);

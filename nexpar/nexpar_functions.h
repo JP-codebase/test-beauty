@@ -6,5 +6,6 @@
 // finished`)
 
 bool nexpar(unsigned int *partition, unsigned int partition_size);
+bool nexpar_ptr(unsigned int *partition, unsigned int partition_size);
 
-#endif //nexpar_functions_h
+#endif // nexpar_functions_h

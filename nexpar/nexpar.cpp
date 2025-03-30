@@ -5,152 +5,14 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "nexpar_functions.h"
+#include "quantifying_information.h"
 
 const double pi{std::acos(-1.0)};
 
 // Number of partition of the integer n
 double number_partition_n(unsigned int n) {
   return std::exp(pi * std::sqrt(2.0L * n / 3.0L)) / (4 * n * std::sqrt(3.0L));
-}
-
-// nexpar
-// It returns true if the program reaches its end (`true` == exeuction
-// finished`)
-
-bool nexpar(unsigned int *partition, unsigned int partition_size) {
-
-  // Find active position
-  if (partition[0] == 1)
-    return true;
-
-  unsigned int active_position;
-  unsigned int sum{0};
-
-  for (active_position = 0; active_position < partition_size - 1;
-       active_position++) {
-    if ((partition[active_position + 1] == 1) ||
-        (partition[active_position + 1] == 0))
-      break;
-    sum += partition[active_position];
-  }
-
-  partition[active_position]--;
-  sum += partition[active_position];
-
-  unsigned int quotient{(partition_size - sum) / partition[active_position]};
-  unsigned int remainder{(partition_size - sum) -
-                         quotient * partition[active_position]};
-
-  for (unsigned int i = active_position + 1;
-       i < (active_position + 1 + quotient); i++) {
-    partition[i] = partition[active_position];
-  }
-
-  if (remainder != 0) {
-    partition[active_position + 1 + quotient] = remainder;
-
-    for (unsigned int i = active_position + 2 + quotient; i < partition_size;
-         i++) {
-      partition[i] = 0;
-    }
-  } else {
-    for (unsigned int i = active_position + 1 + quotient; i < partition_size;
-         i++) {
-      partition[i] = 0;
-    }
-  }
-
-  return false;
-}
-
-// Degeneracy profile
-void degeneracy_profile(unsigned int *partition, unsigned int *dg_profile,
-                        unsigned int partition_size) {
-  for (unsigned int i = 0; i < partition_size; i++) {
-    dg_profile[i] = 0;
-  }
-
-  for (unsigned int i = 0; (i < partition_size) && (partition[i] != 0); i++) {
-    dg_profile[partition[i] - 1]++;
-  }
-}
-
-// Resolution
-
-// Without knowing the degeneracy profile
-float resolution(unsigned int *partition, unsigned int partition_size) {
-  float res{0};
-
-  unsigned int *dg_profile{new unsigned int[partition_size]};
-  degeneracy_profile(partition, dg_profile, partition_size);
-
-  for (unsigned int i = 0; i < partition_size; i++) {
-    if (dg_profile[i] == 0)
-      continue;
-    res -= static_cast<float>((i + 1) * dg_profile[i]) /
-           static_cast<float>(partition_size) *
-           std::log(static_cast<float>(i + 1) /
-                    static_cast<float>(partition_size));
-  }
-
-  delete[] dg_profile;
-
-  return res;
-}
-
-// Knowing the degeneracy profile
-float resolution_degeneracy(unsigned int *dg_profile,
-                            unsigned int dg_profile_size) {
-  float res{0};
-
-  for (unsigned int i = 0; i < dg_profile_size; i++) {
-    if (dg_profile[i] == 0)
-      continue;
-    res -= static_cast<float>((i + 1) * dg_profile[i]) /
-           static_cast<float>(dg_profile_size) *
-           std::log(static_cast<float>(i + 1) /
-                    static_cast<float>(dg_profile_size));
-  }
-
-  return res;
-}
-
-// Relevance
-
-// Without knowing the degeneracy profile
-float relevance(unsigned int *partition, unsigned int partition_size) {
-  float rel{0};
-
-  unsigned int *dg_profile{new unsigned int[partition_size]};
-  degeneracy_profile(partition, dg_profile, partition_size);
-
-  for (unsigned int i = 0; i < partition_size; i++) {
-    if (dg_profile[i] == 0)
-      continue;
-    rel -= (i + 1) * dg_profile[i] / static_cast<float>(partition_size) *
-           std::log(static_cast<float>((i + 1) * dg_profile[i]) /
-                    static_cast<float>(partition_size));
-  }
-
-  delete[] dg_profile;
-
-  return rel;
-}
-
-// Knowing the degeneracy profile
-float relevance_degeneracy(unsigned int *dg_profile,
-                           unsigned int dg_profile_size) {
-  float rel{0};
-
-  for (unsigned int i = 0; i < dg_profile_size; i++) {
-    if (dg_profile[i] == 0)
-      continue;
-    rel -= (i + 1) * dg_profile[i] / static_cast<float>(dg_profile_size) *
-           std::log(static_cast<float>((i + 1) * dg_profile[i]) /
-                    static_cast<float>(dg_profile_size));
-  }
-
-  return rel;
 }
 
 // Print to file, buffered plain text
@@ -173,11 +35,6 @@ void print_partition_to_file_buffered(unsigned int *partition,
     buffer.clear();
   }
 }
-
-// Print to file, binary
-void print_parition_to_file_binary(unsigned int *partition,
-                                   unsigned int partition_size,
-                                   std::ofstream &file) {}
 
 int main() {
 
