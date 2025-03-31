@@ -1,32 +1,3 @@
-/*#include <fstream>*/
-/*#include <iostream>*/
-/*#include <string>*/
-
-/*int main() {*/
-
-/*unsigned int n{17};*/
-/**/
-/*std::string in_filename{"./partitions/partitions_of_" + std::to_string(n) +*/
-/*                        ".bin"};*/
-/*std::string out_filename{"reading_test.txt"};*/
-/**/
-/*std::ifstream in_file(in_filename, std::ios::binary);*/
-/*std::ofstream out_file(out_filename);*/
-/**/
-/*unsigned int* partition {new unsigned int[n]};*/
-/*while (!in_file.eof()) {*/
-/*  in_file.read(reinterpret_cast<char *>(partition), sizeof(partition[0]) *
- * n);*/
-/**/
-/*  for (unsigned int i {0}; i < n; i++) {*/
-/*    std::cout << partition[i] << ' ';*/
-/*  }*/
-/*  std::cout << std::endl;*/
-/*};*/
-
-/*  return 0;*/
-/*}*/
-
 #include "nexpar_functions.h"
 #include "quantifying_information.h"
 #include <chrono>
@@ -64,6 +35,16 @@ void print_partition_to_file_buffered(unsigned int *partition,
   }
 }
 
+std::string float_without_trailing_zeros(float f) {
+
+  std::string float_str{std::to_string(f)};
+  for (int i = float_str.size(); i >= 0; i--) {
+    if (float_str[i] == '0') float_str.erase(i);
+  }
+
+  return float_str;
+}
+
 int main() {
 
   // Input
@@ -95,8 +76,9 @@ int main() {
   float rel{relevance_degeneracy(dg_profile, n)};
 
   // Output to file
-  std::string filename = "./partitions/[" + std::to_string(res_left_bound) +
-                         "," + std::to_string(res_right_bound) +
+  std::string filename = "./partitions/[" +
+                         float_without_trailing_zeros(res_left_bound) + "," +
+                         float_without_trailing_zeros(res_right_bound) +
                          "]_partitions_of_" + std::to_string(n);
 
   // txt output
