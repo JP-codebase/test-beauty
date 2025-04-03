@@ -1,3 +1,5 @@
+#include "nexpar_functions.h"
+#include "quantifying_information.h"
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -5,8 +7,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "nexpar_functions.h"
-#include "quantifying_information.h"
 
 const double pi{std::acos(-1.0)};
 
@@ -36,12 +36,20 @@ void print_partition_to_file_buffered(unsigned int *partition,
   }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 
   // Input
+
   unsigned int n;
-  std::cout << "Insert an integer > 0: ";
-  std::cin >> n;
+  if (argc == 1) {
+    std::cout << "Insert an integer > 0: ";
+    std::cin >> n;
+  } else if (argc == 2) {
+    n = std::atoi(argv[1]);
+  } else {
+    std::cerr << "Error: Too many arguments." << std::endl;
+    return 1;
+  }
 
   const double number_of_partitions{number_partition_n(n)};
   std::cout << "You are going to generate approximately "
@@ -152,8 +160,8 @@ int main() {
     /*out_file_resrel_txt << res << ' ' << rel << '\n';*/
 
     // Binary
-    out_file_partitions_bin.write(reinterpret_cast<const char *>(partition),
-                                  sizeof(unsigned int) * n);
+    /*out_file_partitions_bin.write(reinterpret_cast<const char *>(partition),*/
+    /*                              sizeof(unsigned int) * n);*/
     out_file_resrel_bin.write(reinterpret_cast<const char *>(&res),
                               sizeof(res));
     out_file_resrel_bin.write(reinterpret_cast<const char *>(&rel),

@@ -38,25 +38,49 @@ void print_partition_to_file_buffered(unsigned int *partition,
 std::string float_without_trailing_zeros(float f) {
 
   std::string float_str{std::to_string(f)};
-  for (int i = float_str.size(); i >= 0; i--) {
-    if (float_str[i] == '0') float_str.erase(i);
+  for (int i = float_str.size() - 1; i >= 0; i--) {
+    /*std::cout << float_str[i] << std::endl;*/
+    if (float_str[i] == '0' || float_str[i] == '.') {
+      float_str.erase(i);
+    } else if ((float_str[i] == '1') || (float_str[i] == '2') ||
+               (float_str[i] == '3') || (float_str[i] == '4') ||
+               (float_str[i] == '5') || (float_str[i] == '6') ||
+               (float_str[i] == '7') || (float_str[i] == '8') ||
+               (float_str[i] == '9')) 
+      break;
   }
 
   return float_str;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 
   // Input
-  unsigned int n;
-  std::cout << "Insert an integer > 0: ";
-  std::cin >> n;
 
+  unsigned int n;
   float res_left_bound, res_right_bound;
-  std::cout << "Resolution left bound : ";
-  std::cin >> res_left_bound;
-  std::cout << "Resolution right bound : ";
-  std::cin >> res_right_bound;
+
+  if (argc == 1) {
+    std::cout << "Insert an integer > 0: ";
+    std::cin >> n;
+    std::cout << "Resolution left bound : ";
+    std::cin >> res_left_bound;
+    std::cout << "Resolution right bound : ";
+    std::cin >> res_right_bound;
+  } else if (argc == 2) {
+    n = std::atoi(argv[1]);
+    std::cout << "Resolution left bound : ";
+    std::cin >> res_left_bound;
+    std::cout << "Resolution right bound : ";
+    std::cin >> res_right_bound;
+  } else if (argc == 4) {
+    n = std::atoi(argv[1]);
+    res_left_bound = std::atof(argv[2]);
+    res_right_bound = std::atof(argv[3]);
+  } else {
+    std::cerr << "Error: Too many arguments." << std::endl;
+    return 1;
+  }
 
   // Declaration and initialization of the important variables
   unsigned int *partition{new unsigned int[n]};
