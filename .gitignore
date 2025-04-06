@@ -1,3 +1,5 @@
 nexpar/partitions/
 nexpar/partitions
 *.out
+*partitions*.txt
+*.bin

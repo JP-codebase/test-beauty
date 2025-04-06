@@ -46,7 +46,8 @@ elif len(arguments) == 3:
     res_left_bound = float(arguments[1])
     res_right_bound = float(arguments[2])
     # filename = "partitions/[" + str(res_left_bound) + "," + str(res_right_bound) + "]_partitions_of_" + str(n) + "_resrel.bin"
-    filename = "partitions/[ f'{res_left_bound:g}, f'{res_right_bound:g}]_partitions_of_" + str(n) + "_resrel.bin"
+    # filename = "partitions/[ f'{res_left_bound:g}, f'{res_right_bound:g}]_partitions_of_" + str(n) + "_resrel.bin"
+    filename = "partitions/[" + f'{res_left_bound:g}' + "," + f'{res_right_bound:g}' + "]_partitions_of_" + str(n) + "_resrel.bin"
     res_vals, rel_vals = read_resrel_bin (filename)
 else:
     print("Error: Too many arguments")
