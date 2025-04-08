@@ -1,5 +1,7 @@
 #include "quantifying_information.h"
 #include <cmath>
+#include <functional>
+#include <unordered_map>
 
 // Degeneracy profile
 void degeneracy_profile(unsigned int *partition, unsigned int *dg_profile,
@@ -89,4 +91,102 @@ float relevance_degeneracy(unsigned int *dg_profile,
   }
 
   return rel;
+}
+
+using number_of_bonds =
+    std::function<unsigned int(int, int, unsigned int *, unsigned int[2])>;
+
+number_of_bonds open_boundary = [](int i, int j, unsigned int *lattice,
+                                   unsigned int lattice_shape[2]) {
+  unsigned int n_bounds{0};
+
+  if (i > 0) {
+    if (lattice[i * lattice_shape[1] + j] ==
+        lattice[(i - 1) * lattice_shape[1] + j]) {
+      n_bounds++;
+    }
+  }
+
+  if (i < (lattice_shape[0] - 1)) {
+    if (lattice[i * lattice_shape[1] + j] ==
+        lattice[(i + 1) * lattice_shape[1] + j]) {
+      n_bounds++;
+    }
+  }
+
+  if (j > 0) {
+    if (lattice[i * lattice_shape[1] + j] ==
+        lattice[i * lattice_shape[1] + (j - 1)]) {
+      n_bounds++;
+    }
+  }
+
+  if (j < (lattice_shape[1] - 1)) {
+    if (lattice[i * lattice_shape[1] + j] ==
+        lattice[i * lattice_shape[1] + (j + 1)]) {
+      n_bounds++;
+    }
+  }
+
+  return n_bounds;
+};
+
+number_of_bonds periodic_boundary = [](int i, int j, unsigned int *lattice,
+                                       unsigned int lattice_shape[2]) {
+  unsigned int n_bounds{0};
+
+  if (lattice[i * lattice_shape[1] + j] ==
+      lattice[((i - 1 + lattice_shape[0]) % lattice_shape[0]) *
+                  lattice_shape[1] +
+              j]) {
+    n_bounds++;
+  }
+
+  if (lattice[i * lattice_shape[1] + j] ==
+      lattice[((i + 1) % lattice_shape[0]) * lattice_shape[1] + j]) {
+    n_bounds++;
+  }
+
+  if (lattice[i * lattice_shape[1] + j] ==
+      lattice[i * lattice_shape[1] +
+              (j - 1 + lattice_shape[1]) % lattice_shape[1]]) {
+    n_bounds++;
+  }
+
+  if (lattice[i * lattice_shape[1] + j] ==
+      lattice[i * lattice_shape[1] + (j + 1) % lattice_shape[1]]) {
+    n_bounds++;
+  }
+
+  return n_bounds;
+};
+
+float energy_lattice(unsigned int *lattice, unsigned int lattice_shape[2],
+                     char boundary_conditions ) {
+
+  std::unordered_map<char, number_of_bonds> boundary_functions = {
+      {'o', open_boundary},
+      {'p', periodic_boundary},
+  };
+  auto pair = boundary_functions.find(boundary_conditions);
+
+  number_of_bonds n_bonds = pair->second;
+
+  float energy{0};
+  const float J{1}; // Coupling constant
+
+  /*for (int i = 0; i < lattice_shape[0]; i++) {*/
+  /*  for (int j = (i % 2 == 0) ? 0 : 1; j < lattice_shape[1]; j += 2) {*/
+  /*    energy -= n_bonds(i, j, lattice, lattice_shape);*/
+  /*  }*/
+  /*}*/
+
+  for (int i = 0; i < lattice_shape[0]; i++) {
+    for (int j = 0; j < lattice_shape[1]; j++) {
+      energy -= n_bonds(i, j, lattice, lattice_shape);
+    }
+  }
+
+  energy = J * energy / 2.0;
+  return energy;
 }
