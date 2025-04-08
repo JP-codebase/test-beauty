@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -46,7 +47,7 @@ std::string float_without_trailing_zeros(float f) {
                (float_str[i] == '3') || (float_str[i] == '4') ||
                (float_str[i] == '5') || (float_str[i] == '6') ||
                (float_str[i] == '7') || (float_str[i] == '8') ||
-               (float_str[i] == '9')) 
+               (float_str[i] == '9'))
       break;
   }
 
@@ -193,24 +194,24 @@ int main(int argc, char *argv[]) {
     /*                              sizeof(unsigned int) * n);*/
 
     // Print to terminal
-    /*std::cout << counter << " :\t";*/
-    /*for (unsigned int i{0}; i < n; i++) {*/
-    /*  std::cout << std::setw(width) << partition[i] << ' ';*/
-    /*}*/
+    std::cout << counter << " :\t";
+    for (unsigned int i{0}; i < n; i++) {
+      std::cout << std::setw(width) << partition[i] << ' ';
+    }
 
     // Print degeneracy profile
-    /*std::cout << '\t' << "dg. : ";*/
-    /*for (unsigned int i = 0; i < n; i++) {*/
-    /*  std::cout << std::setw(width) << dg_profile[i] << ' ';*/
-    /*}*/
+    std::cout << '\t' << "dg. : ";
+    for (unsigned int i = 0; i < n; i++) {
+      std::cout << std::setw(width) << dg_profile[i] << ' ';
+    }
 
     // Print resolution
-    /*std::cout << '\t' << "res : " << res;*/
+    std::cout << '\t' << "res : " << res;
 
     // Print relevance
-    /*std::cout << '\t' << "rel : " << rel;*/
+    std::cout << '\t' << "rel : " << rel;
 
-    /*std::cout << std::endl;*/
+    std::cout << std::endl;
 
     completed = nexpar_ptr(partition, n);
     degeneracy_profile(partition, dg_profile, n);
