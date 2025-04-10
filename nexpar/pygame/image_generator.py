@@ -63,9 +63,48 @@ while running:
 
     pygame.display.flip()
     # pygame.image.save(screen, "output.png")
-    clock.tick(30)  # FPS
+    clock.tick(60)  # FPS
 
 input("Execution finished")
 file.close()
 
 pygame.quit()
+
+# TODO
+
+# import numpy as np
+# import pygame
+# import os
+# import time
+# 
+# last_loaded_frame = -1
+# 
+# while running:
+#     # Look for the latest available file
+#     available_frames = sorted([
+#         int(fname.split('_')[1].split('.')[0])
+#         for fname in os.listdir('output')
+#         if fname.startswith('frame_')
+#     ])
+# 
+#     if available_frames and available_frames[-1] > last_loaded_frame:
+#         frame_number = available_frames[-1]
+#         grid = np.load(f"output/frame_{frame_number}.npy")
+#         last_loaded_frame = frame_number
+# 
+#     draw_grid(screen, grid)
+#     pygame.display.flip()
+#     clock.tick(30)
+
+# int frame_counter = 0;
+# int save_every_n_frames = 10;
+# 
+# while (true) {
+#     generate_next_grid(grid);
+# 
+#     if (frame_counter % save_every_n_frames == 0) {
+#         save_grid_to_file(grid, frame_counter);
+#     }
+# 
+#     frame_counter++;
+# }
