@@ -1,5 +1,3 @@
-#include "nexpar_functions.h"
-#include "quantifying_information.h"
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -7,6 +5,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include "nexpar_functions.h"
+#include "quantifying_information.h"
 
 const double pi{std::acos(-1.0)};
 
@@ -16,11 +17,11 @@ double number_partition_n(unsigned int n) {
 }
 
 // Print to file, buffered plain text
-void print_partition_to_file_buffered(unsigned int *partition,
+void print_partition_to_file_buffered(unsigned int* partition,
                                       unsigned int partition_size,
-                                      std::ofstream &file, std::string &buffer,
+                                      std::ofstream& file,
+                                      std::string& buffer,
                                       unsigned int buffer_limit = 1024) {
-
   std::ostringstream oss;
 
   for (unsigned int i{0}; i < partition_size; i++) {
@@ -36,8 +37,7 @@ void print_partition_to_file_buffered(unsigned int *partition,
   }
 }
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char* argv[]) {
   // Input
 
   unsigned int n;
@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
     return 0;
 
   // Declaration and initialization of the important variables
-  unsigned int *partition{new unsigned int[n]};
-  unsigned int *dg_profile{new unsigned int[n]};
+  unsigned int* partition{new unsigned int[n]};
+  unsigned int* dg_profile{new unsigned int[n]};
 
   partition[0] = n;
   for (unsigned int i{1}; i < n; i++) {
@@ -139,7 +139,6 @@ int main(int argc, char *argv[]) {
   std::cout << "----------------------------" << std::endl;
 
   do {
-
     if (counter > (status_bar * ten_percent)) {
       time_step1 = std::chrono::steady_clock::now();
       std::cout << status_bar << "0% : "
@@ -162,10 +161,8 @@ int main(int argc, char *argv[]) {
     // Binary
     /*out_file_partitions_bin.write(reinterpret_cast<const char *>(partition),*/
     /*                              sizeof(unsigned int) * n);*/
-    out_file_resrel_bin.write(reinterpret_cast<const char *>(&res),
-                              sizeof(res));
-    out_file_resrel_bin.write(reinterpret_cast<const char *>(&rel),
-                              sizeof(rel));
+    out_file_resrel_bin.write(reinterpret_cast<const char*>(&res), sizeof(res));
+    out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel), sizeof(rel));
 
     // Print to terminal
     /*std::cout << counter << " :\t";*/
