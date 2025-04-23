@@ -1,3 +1,7 @@
+// Program to generate all the partition of an integer. 
+// It uses the nexpar algorigthm (Combinatorial Algorithms: For Computers and Calculators)
+
+
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -6,8 +10,8 @@
 #include <sstream>
 #include <string>
 
-#include "nexpar_functions.h"
-#include "quantifying_information.h"
+#include "headers/nexpar_functions.h"
+#include "headers/quantifying_information.h"
 
 const double pi { std::acos(-1.0) };
 

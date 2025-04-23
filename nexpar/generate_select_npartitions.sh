@@ -8,7 +8,7 @@ echo "Generating all partitions"
 echo "Insert 'n' : "
 read n
 
-g++ nexpar.cpp quantifying_information.cpp nexpar_functions.cpp -o nexpar.out
+g++ nexpar.cpp headers/quantifying_information.cpp headers/nexpar_functions.cpp -o nexpar.out
 ./nexpar.out $n
 
 echo
@@ -28,7 +28,7 @@ read res_min
 echo "Resolution max value"
 read res_max
 
-g++ select_partitions.cpp quantifying_information.cpp nexpar_functions.cpp -o select_partitions.out
+g++ select_partitions.cpp headers/quantifying_information.cpp headers/nexpar_functions.cpp -o select_partitions.out
 ./select_partitions.out $n $res_min $res_max
 
 echo

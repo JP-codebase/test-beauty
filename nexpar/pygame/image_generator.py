@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 pygame.init()
 
 grid_shape = (2, 3)  # (number of rows, number of columns)
-cell_size = 150
+cell_size = 300
 
 filename = "./partitions/6_set_partitions.txt"
 file = open(filename, "r")
