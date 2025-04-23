@@ -1,5 +1,6 @@
-// Program to generate all the partition of an integer. 
-// It uses the nexpar algorigthm (Combinatorial Algorithms: For Computers and Calculators)
+// Program to generate all the partition of an integer.
+// It uses the nexpar algorigthm (Combinatorial Algorithms: For Computers and
+// Calculators)
 
 
 #include <chrono>
@@ -87,7 +88,7 @@ int main(int argc, char* argv[]) {
     float min_relevance[2] { 1, rel };
     float max_relevance[2] { 1, rel };
 
-    // Variables used for formatting the output to the terminal
+    // Variables used for formatting the output in the terminal
     int status_bar { 0 };
     unsigned int ten_percent = number_of_partitions / 10;
     unsigned int width { static_cast<unsigned int>(
@@ -167,9 +168,9 @@ int main(int argc, char* argv[]) {
         /*out_file_resrel_txt << res << ' ' << rel << '\n';*/
 
         // Binary
-        /*out_file_partitions_bin.write(reinterpret_cast<const char
-         * *>(partition),*/
-        /*                              sizeof(unsigned int) * n);*/
+        // out_file_partitions_bin.write(reinterpret_cast<const
+        // char*>(partition),
+        //                               sizeof(unsigned int) * n);
         out_file_resrel_bin.write(reinterpret_cast<const char*>(&res),
                                   sizeof(res));
         out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),

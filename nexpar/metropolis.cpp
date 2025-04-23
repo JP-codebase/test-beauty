@@ -33,11 +33,13 @@ void next_state(unsigned int* lattice, unsigned int lattice_shape[2]) {
     std::cout << "Swapping : " << (cell1 + 1) << " \033[3"
               << (lattice[cell1] + 1) << "m"
               << "■" << ' ';
-    std::cout << "\033[37m";   // White text
+    // std::cout << "\033[37m";   // White text
+    std::cout << "\033[30m"; // Black text
     std::cout << " -> ";
     std::cout << (cell2 + 2) << " \033[3" << (lattice[cell2] + 1) << "m"
               << "■" << ' ';
-    std::cout << "\033[37m";   // White text
+    // std::cout << "\033[37m";   // White text
+    std::cout << "\033[30m"; // Black text
     std::cout << std::endl;
 
     float energy1 { energy_lattice(lattice, lattice_shape) };
@@ -56,9 +58,9 @@ void next_state(unsigned int* lattice, unsigned int lattice_shape[2]) {
     float rand3 { static_cast<float>(rand()) / static_cast<float>(RAND_MAX) };
 
     /*std::cout << "rand 3: " << rand3 << std::endl;*/
-    std::cout << "acceptance : " << acceptance << std::endl;
-    (rand3 < acceptance) ? std::cout << "Accepted" : std::cout << "Discarded";
-    std::cout << std::endl;
+    std::cout << "Acceptance : " << acceptance << std::endl;
+    // (rand3 < acceptance) ? std::cout << "Accepted" : std::cout << "Discarded";
+    // std::cout << std::endl;
 
     if (rand3 < acceptance) {
         std::cout << "Accpted" << std::endl;
@@ -76,7 +78,8 @@ void next_state(unsigned int* lattice, unsigned int lattice_shape[2]) {
         }
         std::cout << std::endl;
     }
-    std::cout << "\033[37m";   // White text
+    // std::cout << "\033[37m";   // White text
+    std::cout << "\033[30m"; // Black text
 
     std::cout << "----------------------------------------------" << std::endl;
     std::cout << std::endl;
@@ -124,8 +127,8 @@ int main() {
         }
         std::cout << std::endl;
     }
-    std::cout << "\033[37m";   // White text
-    /*std::cout << "\033[30m"; // Black text*/
+    // std::cout << "\033[37m";   // White text
+    std::cout << "\033[30m"; // Black text
 
     std::cout << std::endl;
     std::cout << "Energy : " << energy_lattice(lattice, shape, 'p')
