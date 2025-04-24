@@ -8,7 +8,7 @@
 
 #include "../headers/quantifying_information.h"
 
-const float beta_1 = -10;
+const float beta_1 = 1.0;
 const char boundary_conditions { 'o' };
 
 float stationary_distribution(unsigned int* lattice,
@@ -16,7 +16,8 @@ float stationary_distribution(unsigned int* lattice,
                               const float beta = beta_1) {
 
     return std::exp(
-        -energy_lattice(lattice, lattice_shape, boundary_conditions) * beta);
+        -1.0 * energy_lattice(lattice, lattice_shape, boundary_conditions) *
+        beta);
 }
 
 void print_lattice_to_file_buffered(unsigned int* lattice,
@@ -41,23 +42,13 @@ void print_lattice_to_file_buffered(unsigned int* lattice,
 void next_state(unsigned int* lattice, unsigned int lattice_shape[2],
                 unsigned int lattice_size) {
 
-    // float rand1 { static_cast<float>(rand()) / static_cast<float>(RAND_MAX)
-    // }; float rand2 { static_cast<float>(rand()) /
-    // static_cast<float>(RAND_MAX) };
-    //
-    // unsigned int cell1 { static_cast<unsigned int>(
-    //     floor(rand1 * (lattice_size))) };
-    // unsigned int cell2 { static_cast<unsigned int>(
-    //     floor(rand2 * (lattice_size))) };
-    //
-
     unsigned int cell1 { rand() % lattice_size };
     unsigned int cell2 { rand() % lattice_size };
 
 
     unsigned int* lattice2 { new unsigned int[lattice_size] };
 
-    // Copy lattice in lattice
+    // Copy lattice in lattice2
     {
         for (unsigned int *index { lattice }, *index2 { lattice2 };
              index != (lattice + lattice_size);
@@ -66,6 +57,7 @@ void next_state(unsigned int* lattice, unsigned int lattice_shape[2],
         }
     }
 
+    // Swapping cell1 e cell2 in lattice2
     unsigned int temp { lattice2[cell1] };
     lattice2[cell1] = lattice[cell2];
     lattice2[cell2] = temp;
@@ -90,21 +82,21 @@ void next_state(unsigned int* lattice, unsigned int lattice_shape[2],
     float energy2 { energy_lattice(
         lattice2, lattice_shape, boundary_conditions) };
 
-    float probability1 { std::exp(-energy1) };
-    float probability2 { std::exp(-energy2) };
+    float probability1 { stationary_distribution(lattice, lattice_shape) };
+    float probability2 { stationary_distribution(lattice2, lattice_shape) };
 
     float acceptance;
     (1 < (probability2 / probability1))
         ? acceptance = 1
         : acceptance = (probability2 / probability1);
 
-    float rand3 { static_cast<float>(rand()) / static_cast<float>(RAND_MAX) };
+    int rand_n { rand() };
 
     // std::cout << "Acceptance : " << acceptance << std::endl;
     // (rand3 < acceptance) ? std::cout << "Accepted" : std::cout <<
     // "Discarded"; std::cout << std::endl;
 
-    if (rand3 < acceptance) {
+    if (rand_n < acceptance * RAND_MAX) {
         // std::cout << "Accepted" << std::endl;
         // std::cout << std::endl;
 
@@ -150,21 +142,25 @@ int main() {
     /*unsigned int *partition = new unsigned int[n]{4, 3, 1, 1, 1, 0, 0, 0, 0,
      * 0};*/
 
-    unsigned int* lattice { new unsigned int[n] };
+    // unsigned int* lattice { new unsigned int[n] };
+    //
+    // // TODO: random filling
+    // // Filling the lattice
+    // {
+    //     unsigned int* lattice_index { lattice };
+    //     for (int i = 0; i < n; i++) {
+    //         for (int j = 0; j < partition[i]; j++) {
+    //             *lattice_index = i;
+    //             lattice_index++;
+    //         }
+    //     }
+    //
+    //     // lattice_index = nullptr;
+    // }
 
-    // TODO: random filling
-    // Filling the lattice
-    {
-        unsigned int* lattice_index { lattice };
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < partition[i]; j++) {
-                *lattice_index = i;
-                lattice_index++;
-            }
-        }
-        // lattice_index = nullptr;
-    }
-
+    unsigned int* lattice =
+        new unsigned int[n] { 0, 1, 0, 4, 4, 0, 0, 1, 1, 2, 2, 0, 0, 1, 0,
+                              2, 2, 3, 6, 3, 4, 1, 0, 5, 0, 5, 6, 3, 0, 6 };
 
     // Printing the lattice in the terminal
     for (int i = 0; i < shape[0]; i++) {
@@ -199,8 +195,9 @@ int main() {
     // Needed in the Metropolis algorithm implementation in next_state
     std::srand(time({}));
 
-    int iterations = 600 * 1000;
-    int print_once_every = iterations / (10 * 60);
+    int n_frames = 600;
+    int iterations = 600*100;
+    int print_once_every = iterations / (n_frames/2);
     int ten_percent = iterations / 10;
     float energy;
 
@@ -224,6 +221,22 @@ int main() {
             std::cout << "*" << std::flush;
         }
     }
+
+    for (int i = 0; i < 300; i++) {
+
+        next_state(lattice, shape, n);
+        energy = energy_lattice(lattice, shape, boundary_conditions);
+
+        if (energy > max_energy) {
+            max_energy = energy;
+        } else if (energy < min_energy) {
+            min_energy = energy;
+        }
+
+        print_lattice_to_file_buffered(
+            lattice, n, out_file_lattice_txt, buffer);
+    }
+
     std::cout << std::endl;
 
     std::cout << "Max energy : " << max_energy << std::endl;
