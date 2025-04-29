@@ -55,6 +55,7 @@ else:
 
 
 # Print plot
+plt.xticks(rotation=60, ha='right')
 plt.scatter(res_vals, rel_vals, color='blue', alpha=0.7, marker=".", s=2)
 plt.xlabel('Resolution')
 plt.ylabel('Relevance')

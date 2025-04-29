@@ -163,16 +163,55 @@ void next_state(unsigned int* lattice, unsigned int lattice_shape[2],
 }
 
 int main() {
-    // unsigned int n{9};
-    // unsigned int shape[]{3, 3}; // shape = (number_of_rows,number_of_columns)
-    // unsigned int *partition = new unsigned int[n]{4, 3, 1, 1, 0, 0, 0, 0, 0};
 
-    unsigned int n { 30 };   // partition and lattice size
-    unsigned int shape[] { 6,
-                           5 };   // shape = (number_of_rows,number_of_columns)
+    // unsigned int n { 30 };   // partition and lattice size
+    // unsigned int shape[] { 6,
+    //                        5 };   // shape =
+    //                        (number_of_rows,number_of_columns)
+    // unsigned int* partition =
+    //     new unsigned int[n] { 10, 5, 4, 3, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                           0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    unsigned int n { 64 };   // partition and lattice size
+    unsigned int shape[] { 8,
+                           8 };   // shape = (number_of_rows,number_of_columns)
+    // unsigned int* partition =
+    //     new unsigned int[n] { 10, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    //     2,
+    //                           2,  2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0,
+    //                           0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                           0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                           0, 0, 0 };
+
+    // unsigned int* partition =
+    //     new unsigned int[n] { 8, 5, 5, 4, 4, 4, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1,
+    //                           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+    //                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    //                           };
+
+    // unsigned int* partition =
+    //     new unsigned int[n] { 10, 6, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    //     2,
+    //                           2,  2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+    //                           0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                           0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                           0, 0, 0 };
+
+    // unsigned int* partition =
+    //     new unsigned int[n] { 7, 7, 7, 4, 3, 3, 3, 3, 3, 2, 1, 1, 1, 1, 1, 1,
+    //                           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    //                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    //                           };
+
+
     unsigned int* partition =
-        new unsigned int[n] { 10, 5, 4, 3, 3, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0,
-                              0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        new unsigned int[n] { 5, 5, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 2, 2, 2, 2,
+                              1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
 
     /*unsigned int n{10};*/
     /*unsigned int shape[]{2, 5}; // shape = (number_of_rows,
@@ -182,7 +221,6 @@ int main() {
 
     unsigned int* lattice { new unsigned int[n] };
 
-    // TODO: random filling
     random_lattice_filling(lattice, partition, n);
 
     // Filling the lattice
@@ -233,7 +271,7 @@ int main() {
 
 
     int n_frames = 600;
-    int iterations = 600 * 100;
+    int iterations = 600 * 500;
     int print_once_every = iterations / (n_frames / 2);
     int ten_percent = iterations / 10;
     float energy;
@@ -250,13 +288,19 @@ int main() {
             min_energy = energy;
         }
 
-        if ((i % print_once_every) == 0) {
-            print_lattice_to_file_buffered(
-                lattice, n, out_file_lattice_txt, buffer);
-        }
+        // if ((i % print_once_every) == 0) {
+        //     print_lattice_to_file_buffered(
+        //         lattice, n, out_file_lattice_txt, buffer);
+        // }
+
         if ((i % ten_percent) == 0) {
             std::cout << "*" << std::flush;
         }
+
+        // if (energy == -10) {
+        //   print_lattice_to_file_buffered(lattice, n, out_file_lattice_txt,
+        //   buffer);
+        // };
     }
 
     for (int i = 0; i < 300; i++) {
@@ -270,8 +314,13 @@ int main() {
             min_energy = energy;
         }
 
-        print_lattice_to_file_buffered(
-            lattice, n, out_file_lattice_txt, buffer);
+        // print_lattice_to_file_buffered(
+        //     lattice, n, out_file_lattice_txt, buffer);
+
+        if (energy == -10) {
+            print_lattice_to_file_buffered(
+                lattice, n, out_file_lattice_txt, buffer);
+        };
     }
 
     std::cout << std::endl;

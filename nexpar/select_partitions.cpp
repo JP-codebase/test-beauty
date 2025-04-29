@@ -116,13 +116,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    /*std::ofstream out_file_resrel_txt(filename + "_resrel.txt");*/
-    /*if (!out_file_resrel_txt) {*/
-    /*  std::cerr << "Error: Could not open file " << filename <<
-     * "_resrel.txt"*/
-    /*            << " for writing." << std::endl;*/
-    /*  return 1;*/
-    /*}*/
+    std::ofstream out_file_resrel_txt(filename + "_resrel.txt");
+    if (!out_file_resrel_txt) {
+        std::cerr << "Error: Could not open file " << filename << "_resrel.txt"
+                  << " for writing." << std::endl;
+        return 1;
+    }
 
     // Buffer
     std::string buffer;
@@ -189,10 +188,10 @@ int main(int argc, char* argv[]) {
                                       sizeof(res));
             out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),
                                       sizeof(rel));
+            // txt
+            out_file_resrel_txt << res << ' ' << rel << '\n';
         }
 
-        // txt
-        /*out_file_partitions_txt << res << ' ' << rel << '\n';*/
 
         // Binary
         /*out_file_partitions_bin.write(reinterpret_cast<const char
@@ -255,7 +254,7 @@ int main(int argc, char* argv[]) {
     std::cout << "----------------------------" << std::endl;
 
     out_file_partitions_txt.close();
-    /*out_file_resrel_txt.close();*/
+    out_file_resrel_txt.close();
     /*out_file_partitions_bin.close();*/
     out_file_resrel_bin.close();
 

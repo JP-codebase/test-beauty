@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 # Window
 pygame.init()
 
-grid_shape = (6, 5)  # (number of rows, number of columns)
-cell_size = 300
+grid_shape = (8, 8)
+# grid_shape = (6, 5)  # (number of rows, number of columns)
+cell_size = 150
 
 filename = "metropolis.txt"
 file = open(filename, "r")
@@ -22,6 +23,7 @@ colors = colors.astype(int)
 
 input("Starting?")
 
+counter = 1;
 running = True
 while running:
     for event in pygame.event.get():
@@ -62,7 +64,8 @@ while running:
     #         )
 
     pygame.display.flip()
-    # pygame.image.save(screen, "output.png")
+    pygame.image.save(screen, f"output{counter}.png")
+    counter = counter + 1;
     clock.tick(60)  # FPS
 
 input("Execution finished")
