@@ -1,15 +1,53 @@
 #include <cmath>
-#include <cstdlib>
+// #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <ostream>
+#include <random>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "../headers/quantifying_information.h"
 
 const float beta_1 = 1.0;
 const char boundary_conditions { 'o' };
+
+std::random_device seed;   // A random seed
+
+// A linear congruential engine that generates random numbers based on the
+// seed
+std::minstd_rand generator(seed());
+std::uniform_int_distribution<unsigned int> int_distribution(0, 100);
+std::uniform_real_distribution<float> real_distribution(0.0, 1.0);
+
+
+unsigned int random_int_range(unsigned int n) {
+
+    int_distribution.param(
+        typename decltype(int_distribution)::param_type { 0, n });
+    return int_distribution(generator);
+};
+
+void random_lattice_filling(unsigned int* lattice, unsigned int* partition,
+                            unsigned int array_size) {
+
+
+    std::vector<unsigned int> list(array_size);
+    for (unsigned int i = 0; i < array_size; i++) {
+        list[i] = i;
+    }
+
+    int temp;
+    for (unsigned int i = 0; i < array_size; i++) {
+        for (unsigned int j = 0; j < partition[i]; j++) {
+            temp = random_int_range(size(list) - 1);
+            lattice[list[temp]] = i;
+            // std::cout << lattice[list[temp]] << std::endl;
+            list.erase(list.begin() + temp);
+        }
+    }
+}
 
 float stationary_distribution(unsigned int* lattice,
                               unsigned int lattice_shape[2],
@@ -42,8 +80,8 @@ void print_lattice_to_file_buffered(unsigned int* lattice,
 void next_state(unsigned int* lattice, unsigned int lattice_shape[2],
                 unsigned int lattice_size) {
 
-    unsigned int cell1 { rand() % lattice_size };
-    unsigned int cell2 { rand() % lattice_size };
+    unsigned int cell1 { random_int_range(lattice_size - 1) };
+    unsigned int cell2 { random_int_range(lattice_size - 1) };
 
 
     unsigned int* lattice2 { new unsigned int[lattice_size] };
@@ -90,13 +128,13 @@ void next_state(unsigned int* lattice, unsigned int lattice_shape[2],
         ? acceptance = 1
         : acceptance = (probability2 / probability1);
 
-    int rand_n { rand() };
+    float rand_numb { real_distribution(generator) };
 
     // std::cout << "Acceptance : " << acceptance << std::endl;
     // (rand3 < acceptance) ? std::cout << "Accepted" : std::cout <<
     // "Discarded"; std::cout << std::endl;
 
-    if (rand_n < acceptance * RAND_MAX) {
+    if (rand_numb < acceptance) {
         // std::cout << "Accepted" << std::endl;
         // std::cout << std::endl;
 
@@ -142,10 +180,12 @@ int main() {
     /*unsigned int *partition = new unsigned int[n]{4, 3, 1, 1, 1, 0, 0, 0, 0,
      * 0};*/
 
-    // unsigned int* lattice { new unsigned int[n] };
-    //
-    // // TODO: random filling
-    // // Filling the lattice
+    unsigned int* lattice { new unsigned int[n] };
+
+    // TODO: random filling
+    random_lattice_filling(lattice, partition, n);
+
+    // Filling the lattice
     // {
     //     unsigned int* lattice_index { lattice };
     //     for (int i = 0; i < n; i++) {
@@ -158,9 +198,9 @@ int main() {
     //     // lattice_index = nullptr;
     // }
 
-    unsigned int* lattice =
-        new unsigned int[n] { 0, 1, 0, 4, 4, 0, 0, 1, 1, 2, 2, 0, 0, 1, 0,
-                              2, 2, 3, 6, 3, 4, 1, 0, 5, 0, 5, 6, 3, 0, 6 };
+    // unsigned int* lattice =
+    //     new unsigned int[n] { 0, 1, 0, 4, 4, 0, 0, 1, 1, 2, 2, 0, 0, 1, 0,
+    //                           2, 2, 3, 6, 3, 4, 1, 0, 5, 0, 5, 6, 3, 0, 6 };
 
     // Printing the lattice in the terminal
     for (int i = 0; i < shape[0]; i++) {
@@ -192,12 +232,9 @@ int main() {
     unsigned int buffer_limit = 1024;
 
 
-    // Needed in the Metropolis algorithm implementation in next_state
-    std::srand(time({}));
-
     int n_frames = 600;
-    int iterations = 600*100;
-    int print_once_every = iterations / (n_frames/2);
+    int iterations = 600 * 100;
+    int print_once_every = iterations / (n_frames / 2);
     int ten_percent = iterations / 10;
     float energy;
 
