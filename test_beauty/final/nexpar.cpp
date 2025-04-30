@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
     std::cin >> input;
 
     if (input != 'Y' && input != 'y')
-        return 0;
+        return 1;
 
     // Declaration and initialization of the important variables
     unsigned int* partition { new unsigned int[n] };
