@@ -1,5 +1,6 @@
-nexpar/partitions/
-nexpar/partitions
+partitions/*
+partitions
 *.out
-*partitions*.txt
+*.png
 *.bin
+*.null-ls*

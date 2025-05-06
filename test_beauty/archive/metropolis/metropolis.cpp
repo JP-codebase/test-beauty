@@ -10,7 +10,7 @@
 
 #include "../headers/quantifying_information.h"
 
-const float beta_1 = 1.0;
+const float beta_1 = 0.005;
 const char boundary_conditions { 'o' };
 
 std::random_device seed;   // A random seed
@@ -210,7 +210,8 @@ int main() {
         new unsigned int[n] { 5, 5, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 2, 2, 2, 2,
                               1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                              };
 
 
     /*unsigned int n{10};*/
@@ -219,9 +220,15 @@ int main() {
     /*unsigned int *partition = new unsigned int[n]{4, 3, 1, 1, 1, 0, 0, 0, 0,
      * 0};*/
 
-    unsigned int* lattice { new unsigned int[n] };
+    // unsigned int* lattice { new unsigned int[n] };
+    
+    unsigned int* lattice =
+        new unsigned int[n] { 2, 5, 2, 2, 5, 0, 3, 2, 7, 0, 1, 8, 5, 0, 1, 7,
+                              0, 0, 0, 4, 2, 2, 4, 4, 0, 0, 0, 2, 2, 2, 7, 3,
+                              1, 1, 1, 2, 1, 0, 4, 3, 1, 1, 1, 5, 2, 1, 6, 3,
+                              0, 3, 1, 0, 0, 6, 6, 0, 8, 3, 1, 0, 3, 4, 3, 3 };
 
-    random_lattice_filling(lattice, partition, n);
+    // random_lattice_filling(lattice, partition, n);
 
     // Filling the lattice
     // {
@@ -282,10 +289,11 @@ int main() {
 
 
     int n_frames = 600;
-    int iterations = 600 * 500;
+    int iterations = 600 * 5000;
     int print_once_every = iterations / (n_frames / 2);
     int ten_percent = iterations / 10;
     float energy;
+    float target_energy = -40;
 
     std::cout << "Progress bar : ";
     for (int i = 0; i < iterations; i++) {
@@ -308,10 +316,10 @@ int main() {
             std::cout << "*" << std::flush;
         }
 
-        // if (energy == -10) {
-        //   print_lattice_to_file_buffered(lattice, n, out_file_lattice_txt,
-        //   buffer);
-        // };
+        if (energy == target_energy) {
+            print_lattice_to_file_buffered(
+                lattice, n, out_file_lattice_txt, buffer);
+        };
     }
 
     for (int i = 0; i < 300; i++) {
@@ -329,7 +337,7 @@ int main() {
         // print_lattice_to_file_buffered(
         //     lattice, n, out_file_lattice_txt, buffer);
 
-        if (energy == -10) {
+        if (energy == target_energy) {
             print_lattice_to_file_buffered(
                 lattice, n, out_file_lattice_txt, buffer);
         };

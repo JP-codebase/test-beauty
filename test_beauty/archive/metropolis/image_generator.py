@@ -1,6 +1,8 @@
 import pygame
 import numpy as np
 import matplotlib.pyplot as plt
+import distinctipy
+
 
 # Window
 pygame.init()
@@ -18,14 +20,15 @@ clock = pygame.time.Clock()
 
 # Color map
 n = grid_shape[0] * grid_shape[1]
-cmap = plt.cm.get_cmap('tab20', n)
-colors = cmap(np.arange(n))[:, :3]
-colors = (colors * 255).round().astype(np.uint8)
-print(len(colors))
+# cmap = plt.cm.get_cmap('hsv', n)               # choose a continuous cmap
+# colors = cmap(np.arange(n))[:, :3]             # get RGB tuples
+# colors = (colors * 255).round().astype(np.uint8)
+# print(colors)
 
-# colors_255 = (colors * 255).round().astype(np.uint8)
-# colors = plt.cm.tab10(np.linspace(0, 1, n))[:, :3] * 255
-# colors = colors.astype(int)
+colors_float = distinctipy.get_colors(n)              # list of n RGB tuples in [0,1]
+colors = [distinctipy.get_rgb256(c) for c in colors_float]
+colors = np.array(colors, np.int16)
+# distinctipy.color_swatch(colors)                # display them in Jupyter/Notebook
 
 input("Starting?")
 
@@ -70,7 +73,7 @@ while running:
     #         )
 
     pygame.display.flip()
-    pygame.image.save(screen, f"output{counter}.png")
+    pygame.image.save(screen, f"./output/output{counter}.png")
     counter = counter + 1;
     clock.tick(60)  # FPS
 
