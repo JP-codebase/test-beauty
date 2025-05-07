@@ -1,5 +1,8 @@
+#include <chrono>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
+#include <ios>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -34,7 +37,9 @@ int main(int argc, char* argv[]) {
 
     unsigned int partition_size;
 
-    // Input check
+    /* ------------------------ Inupt Check --------------------------------- */
+
+    // Command line arguments
     {
         if (argc == 2) {
             try {
@@ -54,9 +59,7 @@ int main(int argc, char* argv[]) {
                 return 1;
 
             } catch (const std::out_of_range& e) {
-                std::cerr << RED <<
-                             "Error: "
-                          << e.what() << "\n"
+                std::cerr << RED << "Error: " << e.what() << "\n"
                           << RESET_STYLE;
                 return 1;
             }
@@ -71,6 +74,7 @@ int main(int argc, char* argv[]) {
         partition_size) };
 
 
+    // Asking for confirmation
     {
         std::cout << "Number of partitions to generate :  " << n_of_partitions
                   << "\nDo you want to continue? [Y/n] ";
@@ -83,10 +87,14 @@ int main(int argc, char* argv[]) {
         }
     }
 
+
+    /* ------------------------ Output to File ----------------------------- */
+
+
     std::string filename =
         "./partitions/partitions_of_" + std::to_string(partition_size);
 
-    // txt outpupt to file
+    // Outpupt to txt file
     std::ofstream out_file_partitions_txt(filename + ".txt");
 
     if (!out_file_partitions_txt) {
@@ -95,7 +103,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Binary output to file
+    // Output to binary file
     std::ofstream out_file_resrel_bin(filename + "_resrel.bin",
                                       std::ios::binary);
 
@@ -108,39 +116,165 @@ int main(int argc, char* argv[]) {
 
     std::string buffer;
 
+
+    /* ----------------------- Variable Declariation ----------------------- */
+
     // Partition declaration
     unsigned int* partition { new unsigned int[partition_size] { 0 } };
     unsigned int* dg_profile { new unsigned int[partition_size] };
-    real_t resolution;
-    real_t relevance;
+    real_t res;
+    real_t rel;
+
 
     // Initialize first partition: [partition_size, 0, ..., 0]
-
     partition[0] = partition_size;
     degeneracy_profile(partition, dg_profile, partition_size);
-    resolution = resolution_degeneracy(dg_profile, partition_size);
-    relevance = relevance_degeneracy(dg_profile, partition_size);
 
+    // Resolution
+    real_t min_resolution { res };
+    real_t max_resolution { res };
+
+    // Relevance
+    real_t min_relevance { rel };
+    real_t max_relevance { rel };
+
+    // Relevance
+    rel = relevance_degeneracy(dg_profile, partition_size);
+
+
+    /* ------------------------ UI ---------------------------------------- */
+
+    // Status bar
+    unsigned long int counter { 1 };
+    const long double percentage { 10 };
+    const long double runtime_fraction { n_of_partitions / 100.0L *
+                                         percentage };
+    unsigned int status_bar { 0 };
+
+    // Precision for floating point output
+    long int default_float_precision { std::cout.precision() };   //
+    long int custom1_float_precision { 1 };
+    long int custom2_float_precision { 2 };
+
+    // Time
+    auto start = std::chrono::steady_clock::now();
+    auto time_step1 { start };
+    auto time_step2 { start };
+
+
+    /* ------------------------ Main Loop ---------------------------------- */
 
     // Starting the loop. It ends when reaches the partition [ 1, 1, ..., 1 ]
-
     bool execution_completed = false;
     do {
 
+        if (static_cast<long double>(counter) > (runtime_fraction)) {
+
+            status_bar++;
+            time_step2 = std::chrono::steady_clock::now();
+
+            std::cout
+                << std::setw(10) << std::right
+
+                << std::setprecision(custom1_float_precision) << std::fixed
+                << (status_bar * percentage) << "% : "
+
+                << std::setw(10) << std::right
+                << std::setprecision(custom2_float_precision) << std::scientific
+
+                << ((std::chrono::duration_cast<std::chrono::microseconds>(
+                         (time_step2 - time_step1)))
+                        .count()) /
+                       10e6
+                << " seconds" << std::endl;
+
+            time_step2 = time_step1;
+            counter = 0;
+        }
+
+
         // Output
-        print_partition_to_file_buffered(
-            partition, partition_size, out_file_partitions_txt, buffer);
-        out_file_resrel_bin << resolution << ' ' << relevance;
+        // print_partition_to_file_buffered(
+        //     partition, partition_size, out_file_partitions_txt, buffer);
+        out_file_resrel_bin << res << ' ' << rel;
 
         // Generate the next partition
         execution_completed = nexpar_ptr(partition, partition_size);
+        counter++;
+
+        degeneracy_profile(partition, dg_profile, partition_size);
+
+        res = resolution_degeneracy(dg_profile, partition_size);
+        if (res < min_resolution) {
+            min_resolution = res;
+        } else if (res > max_resolution) {
+            max_resolution = res;
+        }
+
+        rel = relevance_degeneracy(dg_profile, partition_size);
+        if (rel < min_relevance) {
+            min_relevance = rel;
+        } else if (rel > max_relevance) {
+            max_relevance = rel;
+        }
+
     } while (!execution_completed);
 
+
     // Empty the buffer
+
     if (!buffer.empty()) {
         out_file_partitions_txt << buffer;
         buffer.clear();
     }
+
+    time_step1 = std::chrono::steady_clock::now();
+    std::cout << std::setw(10) << std::right
+
+              << std::setprecision(custom1_float_precision) << std::fixed
+              << (100) << "% : "
+
+              << std::setw(10) << std::right
+              << std::setprecision(custom2_float_precision) << std::scientific
+
+              << ((std::chrono::duration_cast<std::chrono::microseconds>(
+                       (time_step2 - time_step1)))
+                      .count()) /
+                     10e6
+              << " seconds" << std::endl;
+
+
+    /* ---------------------- Ending the Program --------------------------- */
+
+    std::cout << std::endl;
+    std::cout << "Execution time : "
+              << ((std::chrono::duration_cast<std::chrono::microseconds>(
+                       (time_step1 - start)))
+                      .count()) /
+                     10e6
+              << " seconds" << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "----------------------------" << std::endl;
+
+
+    // Max and Min Relevance and Resolution
+
+    std::cout << std::endl;
+
+    std::cout << std::setw(20) << "Min resolution : " << std::setw(10)
+              << min_resolution << std::setw(20) << std::setw(20)
+
+              << "Min relevance : " << std::setw(10) << min_relevance
+              << std::setw(20) << std::setw(20) << std::endl;
+
+    std::cout << std::setw(20) << "Max resolution : " << std::setw(10)
+              << max_resolution << std::setw(20)
+              << "Max relevance : " << std::setw(10)
+              << max_relevance << std::setw(20) << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "----------------------------" << std::endl;
 
     delete[] partition;
     delete[] dg_profile;
@@ -150,7 +284,8 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-// Function implementation
+
+// Function implementations
 long double approximate_number_of_partitions(unsigned int n) {
 
     const long double pi { std::acos(-1.0L) };
