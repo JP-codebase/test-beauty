@@ -54,15 +54,5 @@ echo "--------------------------------------------------"
 echo
 
 
-echo -e "Compiling ... \c"
-g++ generate_partitions.cpp ./headers/quantifying_information.cpp ./headers/nexpar_functions.cpp -o generate_partitions.out
-
-if [ $? -eq 0 ]; then
-  echo -e "${bold}${green_text}Compilation complete.${reset_style}"
-else
-  echo -e "${bold}${red_text}Compilation failed."
-fi
-
-echo
 
 ./generate_partitions.out ${size}

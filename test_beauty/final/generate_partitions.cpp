@@ -54,14 +54,14 @@ int main(int argc, char* argv[]) {
                 return 1;
 
             } catch (const std::out_of_range& e) {
-                std::cerr << "\033[31m"
+                std::cerr << RED <<
                              "Error: "
                           << e.what() << "\n"
                           << RESET_STYLE;
                 return 1;
             }
         } else {
-            std::cout << RED << "Error: Incorrect number of arguments."
+            std::cerr << RED << "Error: Incorrect number of arguments."
                       << RESET_STYLE << std::endl;
             return 1;
         }
