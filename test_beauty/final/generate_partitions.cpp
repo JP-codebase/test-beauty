@@ -8,23 +8,16 @@
 #include <stdexcept>
 #include <string>
 
+#include "headers/precision.h"
 #include "headers/nexpar_functions.h"
 #include "headers/quantifying_information.h"
 
-#ifdef REAL_IS_DOUBLE
-using real_t = double;
-#else
-using real_t = float;
-#endif
 
 const char RED[] = "\033[31m";
 const char RESET_STYLE[] = "\e[m";
 
 // Number of partition of the integer n
 long double approximate_number_of_partitions(unsigned int n);
-
-// Input check
-void input_check(unsigned int& partition_size);
 
 // Print to file, buffered plain text
 void print_partition_to_file_buffered(unsigned int* partition,
@@ -131,16 +124,23 @@ int main(int argc, char* argv[]) {
     degeneracy_profile(partition, dg_profile, partition_size);
 
     // Resolution
+    res = resolution_degeneracy(dg_profile, partition_size);
     real_t min_resolution { res };
     real_t max_resolution { res };
 
     // Relevance
+    rel = relevance_degeneracy(dg_profile, partition_size);
     real_t min_relevance { rel };
     real_t max_relevance { rel };
 
-    // Relevance
-    rel = relevance_degeneracy(dg_profile, partition_size);
-
+    // if (sizeof(res) == sizeof(double)) {
+    //     std::cout << "Double precision. \t" << sizeof(res) <<  std::endl;
+    // } else if (sizeof(res) == sizeof(float)) {
+    //     std::cout << "Single precision. \t" << sizeof(res) << std::endl;
+    // }
+    // else {
+    //     std::cout << "Error in real_t definition" << std::endl;
+    // }
 
     /* ------------------------ UI ---------------------------------------- */
 
@@ -194,9 +194,10 @@ int main(int argc, char* argv[]) {
 
 
         // Output
-        // print_partition_to_file_buffered(
-        //     partition, partition_size, out_file_partitions_txt, buffer);
-        out_file_resrel_bin << res << ' ' << rel;
+        print_partition_to_file_buffered(
+            partition, partition_size, out_file_partitions_txt, buffer);
+        out_file_resrel_bin.write(reinterpret_cast<const char*>(&res), sizeof(res)); 
+        out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel), sizeof(rel)); 
 
         // Generate the next partition
         execution_completed = nexpar_ptr(partition, partition_size);
@@ -270,8 +271,8 @@ int main(int argc, char* argv[]) {
 
     std::cout << std::setw(20) << "Max resolution : " << std::setw(10)
               << max_resolution << std::setw(20)
-              << "Max relevance : " << std::setw(10)
-              << max_relevance << std::setw(20) << std::endl;
+              << "Max relevance : " << std::setw(10) << max_relevance
+              << std::setw(20) << std::endl;
 
     std::cout << std::endl;
     std::cout << "----------------------------" << std::endl;

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# --------------- Output Formatting -------------
+
 reset_style="\e[m"
 
 bold="\u001b[1m"
@@ -7,6 +9,9 @@ bold="\u001b[1m"
 green_text="\e[32m"
 yellow_text="\e[33m"
 red_text="\e[31m"
+
+
+# --------------- Starting ----------------------
 
 echo -e "${bold}${yellow_text}Script for generating coloured with same resolution, energy and number of colours, but different relevance.${reset_style} "
 
@@ -53,6 +58,23 @@ echo
 echo "--------------------------------------------------"
 echo
 
-
+# --------------- Generate partitions -------------
 
 ./generate_partitions.out ${size}
+
+
+if [ $? != 0 ]; then
+  echo -e "${bold}${red_text}Execution interruped.${reset_style}"
+  exit 1
+fi
+
+
+# --------------- Select partitions -------------
+
+./select_partitions_resolution.out ${size} 2.4 3.0
+
+
+if [ $? != 0 ]; then
+  echo -e "${bold}${red_text}Execution interruped.${reset_style}"
+  exit 1
+fi

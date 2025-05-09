@@ -1,7 +1,10 @@
-#include "quantifying_information.h"
 #include <cmath>
 #include <functional>
 #include <unordered_map>
+
+// #include "precision.h"
+
+#include "quantifying_information.h"
 
 // Degeneracy profile
 void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
@@ -18,8 +21,8 @@ void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
 // Resolution
 
 // Without knowing the degeneracy profile
-float resolution(unsigned int* partition, unsigned int partition_size) {
-    float res { 0 };
+real_t resolution(unsigned int* partition, unsigned int partition_size) {
+    real_t res { 0 };
 
     unsigned int* dg_profile { new unsigned int[partition_size] };
     degeneracy_profile(partition, dg_profile, partition_size);
@@ -27,10 +30,10 @@ float resolution(unsigned int* partition, unsigned int partition_size) {
     for (unsigned int i = 0; i < partition_size; i++) {
         if (dg_profile[i] == 0)
             continue;
-        res -= static_cast<float>((i + 1) * dg_profile[i]) /
-               static_cast<float>(partition_size) *
-               std::log(static_cast<float>(i + 1) /
-                        static_cast<float>(partition_size));
+        res -= static_cast<real_t>((i + 1) * dg_profile[i]) /
+               static_cast<real_t>(partition_size) *
+               std::log(static_cast<real_t>(i + 1) /
+                        static_cast<real_t>(partition_size));
     }
 
     delete[] dg_profile;
@@ -39,17 +42,17 @@ float resolution(unsigned int* partition, unsigned int partition_size) {
 }
 
 // Knowing the degeneracy profile
-float resolution_degeneracy(unsigned int* dg_profile,
+real_t resolution_degeneracy(unsigned int* dg_profile,
                             unsigned int dg_profile_size) {
-    float res { 0 };
+    real_t res { 0 };
 
     for (unsigned int i = 0; i < dg_profile_size; i++) {
         if (dg_profile[i] == 0)
             continue;
-        res -= static_cast<float>((i + 1) * dg_profile[i]) /
-               static_cast<float>(dg_profile_size) *
-               std::log(static_cast<float>(i + 1) /
-                        static_cast<float>(dg_profile_size));
+        res -= static_cast<real_t>((i + 1) * dg_profile[i]) /
+               static_cast<real_t>(dg_profile_size) *
+               std::log(static_cast<real_t>(i + 1) /
+                        static_cast<real_t>(dg_profile_size));
     }
 
     return res;
@@ -58,8 +61,8 @@ float resolution_degeneracy(unsigned int* dg_profile,
 // Relevance
 
 // Without knowing the degeneracy profile
-float relevance(unsigned int* partition, unsigned int partition_size) {
-    float rel { 0 };
+real_t relevance(unsigned int* partition, unsigned int partition_size) {
+    real_t rel { 0 };
 
     unsigned int* dg_profile { new unsigned int[partition_size] };
     degeneracy_profile(partition, dg_profile, partition_size);
@@ -67,9 +70,9 @@ float relevance(unsigned int* partition, unsigned int partition_size) {
     for (unsigned int i = 0; i < partition_size; i++) {
         if (dg_profile[i] == 0)
             continue;
-        rel -= (i + 1) * dg_profile[i] / static_cast<float>(partition_size) *
-               std::log(static_cast<float>((i + 1) * dg_profile[i]) /
-                        static_cast<float>(partition_size));
+        rel -= (i + 1) * dg_profile[i] / static_cast<real_t>(partition_size) *
+               std::log(static_cast<real_t>((i + 1) * dg_profile[i]) /
+                        static_cast<real_t>(partition_size));
     }
 
     delete[] dg_profile;
@@ -78,16 +81,16 @@ float relevance(unsigned int* partition, unsigned int partition_size) {
 }
 
 // Knowing the degeneracy profile
-float relevance_degeneracy(unsigned int* dg_profile,
+real_t relevance_degeneracy(unsigned int* dg_profile,
                            unsigned int dg_profile_size) {
-    float rel { 0 };
+    real_t rel { 0 };
 
     for (unsigned int i = 0; i < dg_profile_size; i++) {
         if (dg_profile[i] == 0)
             continue;
-        rel -= (i + 1) * dg_profile[i] / static_cast<float>(dg_profile_size) *
-               std::log(static_cast<float>((i + 1) * dg_profile[i]) /
-                        static_cast<float>(dg_profile_size));
+        rel -= (i + 1) * dg_profile[i] / static_cast<real_t>(dg_profile_size) *
+               std::log(static_cast<real_t>((i + 1) * dg_profile[i]) /
+                        static_cast<real_t>(dg_profile_size));
     }
 
     return rel;
@@ -161,7 +164,7 @@ number_of_bonds periodic_boundary = [](int i, int j, unsigned int* lattice,
     return n_bounds;
 };
 
-float energy_lattice(unsigned int* lattice, unsigned int lattice_shape[2],
+real_t energy_lattice(unsigned int* lattice, unsigned int lattice_shape[2],
                      char boundary_conditions) {
 
     std::unordered_map<char, number_of_bonds> boundary_functions = {
@@ -172,8 +175,8 @@ float energy_lattice(unsigned int* lattice, unsigned int lattice_shape[2],
 
     number_of_bonds n_bonds = pair->second;
 
-    float energy { 0 };
-    const float J { 1 };   // Coupling constant
+    real_t energy { 0 };
+    const real_t J { 1 };   // Coupling constant
 
     /*for (int i = 0; i < lattice_shape[0]; i++) {*/
     /*  for (int j = (i % 2 == 0) ? 0 : 1; j < lattice_shape[1]; j += 2) {*/
