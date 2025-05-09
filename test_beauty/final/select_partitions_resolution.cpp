@@ -12,6 +12,7 @@ int main(int argc, char* argv[]) {
     unsigned int partition_size;
     real_t res_min, res_max;
 
+
     /* ------------------------ Inupt Check --------------------------------- */
 
     // Command line arguments
@@ -94,6 +95,29 @@ int main(int argc, char* argv[]) {
                                         std::ios::binary);
 
     if (!input_file_resrel_bin) {
+        std::cerr << RED << "Error: Could not open file " << filename
+                  << "_resrel.bin"
+                  << " for writing." << RESET_STYLE << std::endl;
+        return 1;
+    }
+
+
+    /* ------------------------ Output to File ----------------------------- */
+
+    // Input to txt file
+    std::ofstream output_file_partitions_txt(filename + ".txt");
+
+    if (!output_file_partitions_txt) {
+        std::cerr << RED << "Error: Could not open " << filename << ".txt"
+                  << " for writing." << RESET_STYLE << std::endl;
+        return 1;
+    }
+
+    // Input to binary file
+    std::ofstream output_file_resrel_bin(filename + "_resrel.bin",
+                                        std::ios::binary);
+
+    if (!output_file_resrel_bin) {
         std::cerr << RED << "Error: Could not open file " << filename
                   << "_resrel.bin"
                   << " for writing." << RESET_STYLE << std::endl;

@@ -71,7 +71,44 @@ fi
 
 # --------------- Select partitions -------------
 
-./select_partitions_resolution.out ${size} 2.4 3.0
+echo -e "${bold}${yellow_text}Insert the range of resolution.${reset_style} "
+
+while true; do
+    read -p "Insert the resolution minimum: " res_min
+
+    # Check if input is a number
+    if [[ "$res_min" =~ ^[+-]?([0-9]+(\.[0-9]+)?|\.[0-9]+)$ ]]; then
+      if (( $(bc -l <<< "$res_min > 0") )); then
+        break
+      else 
+        echo -e "${red_text}Error: Please enter a positive number.${reset_style}"
+      fi
+    else
+      echo -e "${red_text}Error: The input is not a number.${reset_style}"
+    fi
+done
+
+while true; do
+    read -p "Insert the resolution maximum: " res_max
+
+    # Check if input is a number
+    if [[ "$res_max" =~ ^[+-]?([0-9]+(\.[0-9]+)?|\.[0-9]+)$ ]]; then
+      if (( $(bc -l <<< "$res_max > 0") )); then
+          if (( $(bc -l <<< "$res_max > $res_min") )); then
+              break
+          else
+            echo -e "${red_text}Error: Max must be greater than min:${reset_style} ${res_min}"
+          fi 
+      else 
+        echo -e "${red_text}Error: Please enter a positive number.${reset_style}"
+      fi
+    else
+      echo -e "${red_text}Error: The input is not a number.${reset_style}"
+    fi
+done
+
+
+./select_partitions_resolution.out ${size} ${res_min} ${res_max}
 
 
 if [ $? != 0 ]; then
