@@ -1,15 +1,15 @@
 import matplotlib.pyplot as plt
 
-from numpy import block, floor, log10
+import numpy as np
 import struct
 import sys
 
 
-def read_resrel_bin(filename, real_t, fraction):
+def read_resrel_bin(filename, real_t, sample_fraction):
 
     # filename      :   name of the file to open
     # real_t        :   'f' float or 'd' double
-    # fraction      :   fraction of points to plot ( 0 < fraction <= 1 )
+    # sample_fraction      :   sample_fraction of points to plot ( 0 < sample_fraction <= 1 )
 
     match real_t:
         case "f":
@@ -27,8 +27,9 @@ def read_resrel_bin(filename, real_t, fraction):
 
     res_vals, rel_vals = [], []
 
-    threshold = fraction * 10 ** (-floor(log10(fraction)))
-    reset_count = 1 * 10 ** (-floor(log10(fraction)))
+    # Store data if counter < threshold and discard them if threshold < counter < reset_counter
+    threshold = sample_fraction * 10 ** (-np.floor(np.log10(sample_fraction)))
+    reset_count = 1 * 10 ** (-np.floor(np.log10(sample_fraction)))
 
     i = 0
 
@@ -60,57 +61,72 @@ def read_resrel_bin(filename, real_t, fraction):
     return res_vals, rel_vals
 
 
-fraction = 1
-arguments = sys.argv[1:]
+def main():
+    sample_fraction = 1
+    arguments = sys.argv[1:]
 
-if len(arguments) == 0:
+    if len(arguments) == 0:
 
-    n = int(input("Insert the size. (Width x Height) : \t"))
-    res_vals, rel_vals = read_resrel_bin(
-        "./partitions/partitions_of_" + str(n) + "_resrel.bin", "d", fraction
-    )
+        n = int(input("Insert the size. (Width x Height) : \t"))
+        res_vals, rel_vals = read_resrel_bin(
+            "./partitions/partitions_of_" + str(n) + "_resrel.bin", "d", sample_fraction
+        )
 
-elif len(arguments) == 1:
+    elif len(arguments) == 1:
 
-    n = int(arguments[0])
-    res_vals, rel_vals = read_resrel_bin(
-        "./partitions/partitions_of_" + str(n) + "_resrel.bin", "d", fraction
-    )
+        n = int(arguments[0])
+        res_vals, rel_vals = read_resrel_bin(
+            "./partitions/partitions_of_" + str(n) + "_resrel.bin", "d", sample_fraction
+        )
 
-elif len(arguments) == 3:
+    elif len(arguments) == 3:
 
-    n = int(arguments[0])
-    res_left_bound = float(arguments[1])
-    res_right_bound = float(arguments[2])
-    # filename = "partitions/[" + str(res_left_bound) + "," + str(res_right_bound) + "]_partitions_of_" + str(n) + "_resrel.bin"
-    # filename = "partitions/[ f'{res_left_bound:g}, f'{res_right_bound:g}]_partitions_of_" + str(n) + "_resrel.bin"
-    filename = (
-        "partitions/["
-        + f"{res_left_bound:g}"
-        + ","
-        + f"{res_right_bound:g}"
-        + "]_partitions_of_"
+        n = int(arguments[0])
+        res_left_bound = float(arguments[1])
+        res_right_bound = float(arguments[2])
+        # filename = "partitions/[" + str(res_left_bound) + "," + str(res_right_bound) + "]_partitions_of_" + str(n) + "_resrel.bin"
+        # filename = "partitions/[ f'{res_left_bound:g}, f'{res_right_bound:g}]_partitions_of_" + str(n) + "_resrel.bin"
+        filename = (
+            "partitions/["
+            + f"{res_left_bound:g}"
+            + ","
+            + f"{res_right_bound:g}"
+            + "]_partitions_of_"
+            + str(n)
+            + "_resrel.bin"
+        )
+        res_vals, rel_vals = read_resrel_bin(filename, "d", sample_fraction)
+
+    else:
+        print("Error: Too many arguments")
+        sys.exit(1)
+
+    # Print plot
+
+    n_colors = np.int16(np.random.rand(len(res_vals))*n)
+    plt.figure(figsize=(6, 5))
+    scatter_colors = plt.scatter(res_vals, rel_vals, c=n_colors, cmap="viridis", alpha=0.7, marker=".", s=2)
+
+    # Add a colorbar to show the mapping from z-value to color:
+    cbar = plt.colorbar(scatter_colors)
+    cbar.set_label("Number of colors")
+
+    plt.title(
+        "n = "
         + str(n)
-        + "_resrel.bin"
+        + "  N. Partitions ~ "
+        + str(int(len(res_vals) / sample_fraction))
     )
-    res_vals, rel_vals = read_resrel_bin(filename, "d", fraction)
+    plt.xlabel("Resolution")
+    plt.ylabel("Relevance")
+    plt.xticks(rotation=60, ha="right")
 
-else:
-    print("Error: Too many arguments")
-    sys.exit(1)
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.show()
+    # plt.savefig()
 
 
-# Print plot
-
-plt.scatter(res_vals, rel_vals, color="blue", alpha=0.7, marker=".", s=2)
-
-plt.title("n = " + str(n) + "  N. Partitions ~ " + str(int(len(res_vals) / fraction)))
-plt.xlabel("Resolution")
-plt.ylabel("Relevance")
-plt.xticks(rotation=60, ha="right")
-
-plt.grid(True)
-
-plt.show()
-# plt.savefig()
-
+if __name__ == "__main__":
+    main()

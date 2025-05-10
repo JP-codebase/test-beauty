@@ -43,7 +43,7 @@ real_t resolution(unsigned int* partition, unsigned int partition_size) {
 
 // Knowing the degeneracy profile
 real_t resolution_degeneracy(unsigned int* dg_profile,
-                            unsigned int dg_profile_size) {
+                             unsigned int dg_profile_size) {
     real_t res { 0 };
 
     for (unsigned int i = 0; i < dg_profile_size; i++) {
@@ -82,7 +82,7 @@ real_t relevance(unsigned int* partition, unsigned int partition_size) {
 
 // Knowing the degeneracy profile
 real_t relevance_degeneracy(unsigned int* dg_profile,
-                           unsigned int dg_profile_size) {
+                            unsigned int dg_profile_size) {
     real_t rel { 0 };
 
     for (unsigned int i = 0; i < dg_profile_size; i++) {
@@ -165,7 +165,7 @@ number_of_bonds periodic_boundary = [](int i, int j, unsigned int* lattice,
 };
 
 real_t energy_lattice(unsigned int* lattice, unsigned int lattice_shape[2],
-                     char boundary_conditions) {
+                      char boundary_conditions) {
 
     std::unordered_map<char, number_of_bonds> boundary_functions = {
         { 'o', open_boundary },
@@ -192,4 +192,18 @@ real_t energy_lattice(unsigned int* lattice, unsigned int lattice_shape[2],
 
     energy = J * energy / 2.0;
     return energy;
+}
+
+unsigned int number_of_colors_partition(unsigned int* partition,
+                                        unsigned int partition_size) {
+
+    unsigned int n_colors { 0 };
+
+    for (n_colors; n_colors < partition_size; n_colors++) {
+        if (partition[n_colors] == 0) {
+            return n_colors;
+        }
+    }
+
+    return n_colors;
 }

@@ -81,8 +81,7 @@ int main(int argc, char* argv[]) {
     }
 
 
-    /* ------------------------ Open Output Files -----------------------------
-     */
+    /* ------------------------ Open Output Files --------------------------- */
 
 
     std::string path = "./partitions/";
@@ -105,6 +104,16 @@ int main(int argc, char* argv[]) {
     if (!out_file_resrel_bin) {
         std::cerr << RED << "Error: Could not open file " << path + filename
                   << "_resrel.bin"
+                  << " for writing." << RESET_STYLE << std::endl;
+        return 1;
+    }
+
+    std::ofstream out_file_colors_bin(path + filename + "_colors.bin",
+                                      std::ios::binary);
+
+    if (!out_file_colors_bin) {
+        std::cerr << RED << "Error: Could not open file " << path + filename
+                  << "_colors.bin"
                   << " for writing." << RESET_STYLE << std::endl;
         return 1;
     }
@@ -134,6 +143,10 @@ int main(int argc, char* argv[]) {
     rel = relevance_degeneracy(dg_profile, partition_size);
     real_t min_relevance { rel };
     real_t max_relevance { rel };
+
+    // Number of colors
+    unsigned int n_colors { number_of_colors_partition(partition,
+                                                       partition_size) };
 
 
     /* ------------------------ UI ---------------------------------------- */
@@ -197,6 +210,8 @@ int main(int argc, char* argv[]) {
 
         out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),
                                   sizeof(rel));
+        out_file_colors_bin.write(reinterpret_cast<const char*>(&n_colors),
+                                  sizeof(n_colors));
 
         // Generate the next partition
         execution_completed = nexpar_ptr(partition, partition_size);
@@ -274,6 +289,7 @@ int main(int argc, char* argv[]) {
 
     out_file_partitions_txt.close();
     out_file_resrel_bin.close();
+    out_file_colors_bin.close();
     return 0;
 }
 
