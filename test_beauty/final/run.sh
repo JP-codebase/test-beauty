@@ -2,24 +2,25 @@
 
 # --------------- Output Formatting -------------
 
-reset_style="\e[m"
+RESET_STYLE="\033[m"
 
-bold="\u001b[1m"
+BOLD="\u001b[1m"
 
-green_text="\e[32m"
-yellow_text="\e[33m"
-red_text="\e[31m"
+GREEN_TEXT="\033[32m"
+YELLOW_TEXT="\033[33m"
+RED_TEXT="\033[31m"
 
 
 # --------------- Starting ----------------------
 
-echo -e "${bold}${yellow_text}Script for generating coloured with same resolution, energy and number of colours, but different relevance.${reset_style} "
+echo -e "${BOLD}${YELLOW_TEXT}Script for generating coloured with same resolution, energy and number of colours, but different relevance.${RESET_STYLE} "
 
 
 echo 
-echo -e "${bold}Grid size.${reset_style}"
+echo -e "${BOLD}Grid size.${RESET_STYLE}"
 
 
+# Get width
 while true; do
     read -p "Insert the width: " width
 
@@ -28,13 +29,14 @@ while true; do
       if (( width > 0 )); then
         break
       else 
-        echo -e "${red_text}Error: Please enter a positive integer.${reset_style}"
+        echo -e "${RED_TEXT}Error: Please enter a positive integer.${RESET_STYLE}"
       fi
     else
-      echo -e "${red_text}Error: The input is not an integer.${reset_style}"
+      echo -e "${RED_TEXT}Error: The input is not an integer.${RESET_STYLE}"
     fi
 done
 
+# Get height
 while true; do
     read -p "Insert the height: " height
 
@@ -43,10 +45,10 @@ while true; do
       if (( height > 0 )); then
         break
       else 
-        echo -e "${red_text}Error: Please enter a positive integer.${reset_style}"
+        echo -e "${RED_TEXT}Error: Please enter a positive integer.${RESET_STYLE}"
       fi
     else
-      echo -e "${red_text}Error: The input is not an integer.${reset_style}"
+      echo -e "${RED_TEXT}Error: The input is not an integer.${RESET_STYLE}"
     fi
 done
 
@@ -58,21 +60,33 @@ echo
 echo "--------------------------------------------------"
 echo
 
+
 # --------------- Generate partitions -------------
 
 ./generate_partitions.out ${size}
 
 
 if [ $? != 0 ]; then
-  echo -e "${bold}${red_text}Execution interruped.${reset_style}"
+  echo -e "${BOLD}${RED_TEXT}Execution interruped.${RESET_STYLE}"
   exit 1
 fi
 
 
-# --------------- Select partitions -------------
+# ---------------- Res_Rel Plot ----------------------
 
-echo -e "${bold}${yellow_text}Insert the range of resolution.${reset_style} "
+echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE} "
 
+python res_rel_plot.py ${size} 2> >(grep -v '^MESA-INTEL:' >&2) &
+
+echo
+echo "--------------------------------------------------"
+echo
+
+# ---------------------- Select partitions -------------------------
+
+echo -e "${BOLD}${YELLOW_TEXT}Insert the range of resolution.${RESET_STYLE} "
+
+# Get resolution_min
 while true; do
     read -p "Insert the resolution minimum: " res_min
 
@@ -81,13 +95,14 @@ while true; do
       if (( $(bc -l <<< "$res_min > 0") )); then
         break
       else 
-        echo -e "${red_text}Error: Please enter a positive number.${reset_style}"
+        echo -e "${RED_TEXT}Error: Please enter a positive number.${RESET_STYLE}"
       fi
     else
-      echo -e "${red_text}Error: The input is not a number.${reset_style}"
+      echo -e "${RED_TEXT}Error: The input is not a number.${RESET_STYLE}"
     fi
 done
 
+# Get resolution_max
 while true; do
     read -p "Insert the resolution maximum: " res_max
 
@@ -97,13 +112,13 @@ while true; do
           if (( $(bc -l <<< "$res_max > $res_min") )); then
               break
           else
-            echo -e "${red_text}Error: Max must be greater than min:${reset_style} ${res_min}"
+            echo -e "${RED_TEXT}Error: Max must be greater than min:${RESET_STYLE} ${res_min}"
           fi 
       else 
-        echo -e "${red_text}Error: Please enter a positive number.${reset_style}"
+        echo -e "${RED_TEXT}Error: Please enter a positive number.${RESET_STYLE}"
       fi
     else
-      echo -e "${red_text}Error: The input is not a number.${reset_style}"
+      echo -e "${RED_TEXT}Error: The input is not a number.${RESET_STYLE}"
     fi
 done
 
@@ -112,6 +127,16 @@ done
 
 
 if [ $? != 0 ]; then
-  echo -e "${bold}${red_text}Execution interruped.${reset_style}"
+  echo -e "${BOLD}${RED_TEXT}Execution interruped.${RESET_STYLE}"
   exit 1
 fi
+
+# ---------------- Res_Rel Plot ----------------------
+
+echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE} "
+
+python res_rel_plot.py ${size} ${res_min} ${res_max} 2> >(grep -v '^MESA-INTEL:' >&2) &
+
+echo
+echo "--------------------------------------------------"
+echo

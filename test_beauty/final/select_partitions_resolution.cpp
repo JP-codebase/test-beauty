@@ -4,8 +4,11 @@
 
 #include "./headers/precision.h"
 
+
+std::string real_t_without_trailing_zeros(real_t f);
+
 const char RED[] = "\033[31m";
-const char RESET_STYLE[] = "\e[m";
+const char RESET_STYLE[] = "\033[m";
 
 int main(int argc, char* argv[]) {
 
@@ -13,113 +16,92 @@ int main(int argc, char* argv[]) {
     real_t res_min, res_max;
 
 
-    /* ------------------------ Inupt Check --------------------------------- */
+    /* ------------------------ Input Check --------------------------------- */
 
     // Command line arguments
     {
-        switch (argc) {
-            case 4:
-                try {
-                    try {
-                        int value = std::stoi(argv[1]);
+        if (argc != 4) {
+            std::cerr << RED << "Error: Expected 3 arguments: " << RESET_STYLE
+                      << "size resolution_min resolution_max. " << RED
+                      << "Got : " << RESET_STYLE << (argc - 1) << std::endl;
+            return 1;
+        }
 
-                        if (value < 0) {
-                            throw std::out_of_range(
-                                "Value must be a positive integer");
-                        }
+        try {
+            partition_size = std::stoul(argv[1]);
+            res_min = std::stod(argv[2]);
+            res_max = std::stod(argv[3]);
 
-                        partition_size = std::stoul(argv[1]);
-
-                    } catch (const std::invalid_argument& e) {
-                        std::cerr << RED
-                                  << "Error: Invalid argument. Input is "
-                                     "not a valid integer.\n"
-                                  << RESET_STYLE;
-                        return 1;
-
-                    } catch (const std::out_of_range& e) {
-                        std::cerr << RED << "Error: " << e.what() << "\n"
-                                  << RESET_STYLE;
-                        return 1;
-                    }
-
-                    real_t value1 = std::stod(argv[2]);
-                    real_t value2 = std::stod(argv[3]);
-
-                    if (value1 < 0 || value2 < 0 || value1 > value2) {
-                        throw std::out_of_range(
-                            "Error: Min, Max > 0 and Min < Max.");
-                    }
-
-                    res_min = value1;
-                    res_max = value2;
-
-                } catch (const std::invalid_argument& e) {
-                    std::cerr << RED
-                              << "Error: Invalid argument. Input is "
-                                 "not a valid integer.\n"
-                              << RESET_STYLE;
-                    return 1;
-                } catch (const std::out_of_range& e) {
-                    std::cerr << RED << "Error: " << e.what() << "\n"
-                              << RESET_STYLE;
-                    return 1;
-                }
-
-                break;
-            default:
-                std::cerr << RED << "Error: Incorrect number of arguments."
-                          << RESET_STYLE << std::endl;
-                return 1;
-                break;
+            if (res_min < 0 || res_max < 0 || res_min > res_max)
+                throw std::out_of_range("Min and Max must be ≥0 and Min ≤ Max");
+        } catch (const std::invalid_argument&) {
+            std::cerr << RED << "Error: Arguments must be numeric.\n"
+                      << RESET_STYLE;
+            return 1;
+        } catch (const std::out_of_range& e) {
+            std::cerr << RED << "Error: " << e.what() << "\n" << RESET_STYLE;
+            return 1;
         }
     }
 
 
-    /* ------------------------ Input from File ----------------------------- */
+    std::string path { "./partitions/" };
 
-    std::string filename =
-        "./partitions/partitions_of_" + std::to_string(partition_size);
+    /* ------------------------ Open Input Files --------------------------- */
 
-    // Input to txt file
-    std::ifstream input_file_partitions_txt(filename + ".txt");
+    std::string filename = "partitions_of_" + std::to_string(partition_size);
+
+    // Input from txt file
+    std::ifstream input_file_partitions_txt(path + filename + ".txt");
 
     if (!input_file_partitions_txt) {
-        std::cerr << RED << "Error: Could not open " << filename << ".txt"
-                  << " for writing." << RESET_STYLE << std::endl;
+        std::cerr << RED << "Error: Could not open " << path + filename
+                  << ".txt"
+                  << " for reading." << RESET_STYLE << std::endl;
         return 1;
     }
 
-    // Input to binary file
-    std::ifstream input_file_resrel_bin(filename + "_resrel.bin",
+    // Input from binary file
+    std::ifstream input_file_resrel_bin(path + filename + "_resrel.bin",
                                         std::ios::binary);
 
     if (!input_file_resrel_bin) {
-        std::cerr << RED << "Error: Could not open file " << filename
+        std::cerr << RED << "Error: Could not open file " << path + filename
                   << "_resrel.bin"
-                  << " for writing." << RESET_STYLE << std::endl;
+                  << " for reading." << RESET_STYLE << std::endl;
         return 1;
     }
 
 
-    /* ------------------------ Output to File ----------------------------- */
+    /* ------------------------ Open Output Files --------------------------- */
 
-    // Input to txt file
-    std::ofstream output_file_partitions_txt(filename + ".txt");
+    // Output to txt file
+    std::ofstream output_file_partitions_txt(
+        path + "[" + real_t_without_trailing_zeros(res_min) + "," +
+        real_t_without_trailing_zeros(res_max) + "]_" + filename + ".txt");
+
 
     if (!output_file_partitions_txt) {
-        std::cerr << RED << "Error: Could not open " << filename << ".txt"
+        std::cerr << RED << "Error: Could not open "
+                  << (path + "[" + real_t_without_trailing_zeros(res_min) +
+                      "," + real_t_without_trailing_zeros(res_max) + "]_" +
+                      filename + ".txt")
                   << " for writing." << RESET_STYLE << std::endl;
         return 1;
     }
 
-    // Input to binary file
-    std::ofstream output_file_resrel_bin(filename + "_resrel.bin",
-                                        std::ios::binary);
+    // Output to binary file
+    std::ofstream output_file_resrel_bin(
+        path + "[" + real_t_without_trailing_zeros(res_min) + "," +
+            real_t_without_trailing_zeros(res_max) + "]_" + filename +
+            "_resrel.bin",
+        std::ios::binary);
 
     if (!output_file_resrel_bin) {
-        std::cerr << RED << "Error: Could not open file " << filename
-                  << "_resrel.bin"
+        std::cerr << RED << "Error: Could not open file "
+                  << (path + "[" + real_t_without_trailing_zeros(res_min) +
+                      "," + real_t_without_trailing_zeros(res_max) + "]_" +
+                      filename + "_resrel.bin")
                   << " for writing." << RESET_STYLE << std::endl;
         return 1;
     }
@@ -129,9 +111,14 @@ int main(int argc, char* argv[]) {
 
 
     real_t res { -1 }, rel { -1 };
-    // unsigned int* partition {new unsigned int[partition_size]};
+    const unsigned int size_real_t { sizeof(res) };
 
-    std::string partition(2*partition_size, '\0');
+    std::string partition(2 * partition_size, '\0');
+
+
+    std::string buffer {};
+    unsigned int buffer_limit { 1024 };
+
 
     while (true) {
 
@@ -144,18 +131,53 @@ int main(int argc, char* argv[]) {
         }
 
         if ((res_min <= res) && (res_max >= res)) {
-            std::cout << "Resolution : " << res << "\t Relevance : " << rel
-                      << std::endl;
-            for (auto letter : partition) {
-                std::cout << letter;
+            output_file_resrel_bin.write(reinterpret_cast<const char*>(&res),
+                                         size_real_t);
+            output_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),
+                                         size_real_t);
+
+            buffer += partition + "\n";
+
+            if (buffer.size() >= buffer_limit) {
+                output_file_partitions_txt << buffer;
+                buffer.clear();
             }
-            std::cout << std::endl;
         }
     }
 
+    if (!buffer.empty()) {
+        output_file_partitions_txt << buffer;
+        buffer.clear();
+    }
 
     input_file_partitions_txt.close();
     input_file_resrel_bin.close();
 
+    output_file_partitions_txt.close();
+    output_file_resrel_bin.close();
+
     return 0;
+}
+
+
+/* ---------------------- Function Implementations ------------------------- */
+
+std::string real_t_without_trailing_zeros(real_t f) {
+
+    std::string real_t_str { std::to_string(f) };
+
+    for (int i = real_t_str.size() - 1; i >= 0; i--) {
+
+        if (real_t_str[i] == '0' || real_t_str[i] == '.') {
+            real_t_str.erase(i);
+
+        } else if ((real_t_str[i] == '1') || (real_t_str[i] == '2') ||
+                   (real_t_str[i] == '3') || (real_t_str[i] == '4') ||
+                   (real_t_str[i] == '5') || (real_t_str[i] == '6') ||
+                   (real_t_str[i] == '7') || (real_t_str[i] == '8') ||
+                   (real_t_str[i] == '9'))
+            break;
+    }
+
+    return real_t_str;
 }

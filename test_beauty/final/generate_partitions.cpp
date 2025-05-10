@@ -2,19 +2,19 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <ios>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
-#include "headers/precision.h"
 #include "headers/nexpar_functions.h"
+#include "headers/precision.h"
 #include "headers/quantifying_information.h"
 
 
 const char RED[] = "\033[31m";
-const char RESET_STYLE[] = "\e[m";
+const char RESET_STYLE[] = "\033[m";
 
 // Number of partition of the integer n
 long double approximate_number_of_partitions(unsigned int n);
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
     unsigned int partition_size;
 
-    /* ------------------------ Inupt Check --------------------------------- */
+    /* ------------------------ Input Check --------------------------------- */
 
     // Command line arguments
     {
@@ -57,8 +57,8 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         } else {
-            std::cerr << RED << "Error: Incorrect number of arguments."
-                      << RESET_STYLE << std::endl;
+            std::cerr << RED << "Error: Incorrect number of arguments.\n"
+                      << RESET_STYLE;
             return 1;
         }
     }
@@ -81,27 +81,29 @@ int main(int argc, char* argv[]) {
     }
 
 
-    /* ------------------------ Output to File ----------------------------- */
+    /* ------------------------ Open Output Files -----------------------------
+     */
 
 
-    std::string filename =
-        "./partitions/partitions_of_" + std::to_string(partition_size);
+    std::string path = "./partitions/";
+    std::string filename = "partitions_of_" + std::to_string(partition_size);
 
     // Outpupt to txt file
-    std::ofstream out_file_partitions_txt(filename + ".txt");
+    std::ofstream out_file_partitions_txt(path + filename + ".txt");
 
     if (!out_file_partitions_txt) {
-        std::cerr << RED << "Error: Could not open " << filename << ".txt"
+        std::cerr << RED << "Error: Could not open " << path + filename
+                  << ".txt"
                   << " for writing." << RESET_STYLE << std::endl;
         return 1;
     }
 
     // Output to binary file
-    std::ofstream out_file_resrel_bin(filename + "_resrel.bin",
+    std::ofstream out_file_resrel_bin(path + filename + "_resrel.bin",
                                       std::ios::binary);
 
     if (!out_file_resrel_bin) {
-        std::cerr << RED << "Error: Could not open file " << filename
+        std::cerr << RED << "Error: Could not open file " << path + filename
                   << "_resrel.bin"
                   << " for writing." << RESET_STYLE << std::endl;
         return 1;
@@ -133,22 +135,15 @@ int main(int argc, char* argv[]) {
     real_t min_relevance { rel };
     real_t max_relevance { rel };
 
-    // if (sizeof(res) == sizeof(double)) {
-    //     std::cout << "Double precision. \t" << sizeof(res) <<  std::endl;
-    // } else if (sizeof(res) == sizeof(float)) {
-    //     std::cout << "Single precision. \t" << sizeof(res) << std::endl;
-    // }
-    // else {
-    //     std::cout << "Error in real_t definition" << std::endl;
-    // }
 
     /* ------------------------ UI ---------------------------------------- */
 
     // Status bar
     unsigned long int counter { 1 };
-    const long double percentage { 10 };
+    constexpr long double kProgressStepPercent = 10.0L;
+
     const long double runtime_fraction { n_of_partitions / 100.0L *
-                                         percentage };
+                                         kProgressStepPercent };
     unsigned int status_bar { 0 };
 
     // Precision for floating point output
@@ -158,8 +153,8 @@ int main(int argc, char* argv[]) {
 
     // Time
     auto start = std::chrono::steady_clock::now();
-    auto time_step1 { start };
-    auto time_step2 { start };
+    auto time_step1 = std::chrono::steady_clock::now();
+    auto time_step2 = std::chrono::steady_clock::now();
 
 
     /* ------------------------ Main Loop ---------------------------------- */
@@ -168,27 +163,27 @@ int main(int argc, char* argv[]) {
     bool execution_completed = false;
     do {
 
+        // Chrono
         if (static_cast<long double>(counter) > (runtime_fraction)) {
 
             status_bar++;
             time_step2 = std::chrono::steady_clock::now();
 
-            std::cout
-                << std::setw(10) << std::right
+            std::cout << std::setw(10) << std::right
 
-                << std::setprecision(custom1_float_precision) << std::fixed
-                << (status_bar * percentage) << "% : "
+                      << std::setprecision(custom1_float_precision)
+                      << std::fixed << (status_bar * kProgressStepPercent)
+                      << "% : "
 
-                << std::setw(10) << std::right
-                << std::setprecision(custom2_float_precision) << std::scientific
+                      << std::setw(10) << std::right
+                      << std::setprecision(custom2_float_precision)
+                      << std::scientific
+                      << std::chrono::duration<double>(time_step2 - time_step1)
+                             .count()
+                      << " seconds" << std::endl;
 
-                << ((std::chrono::duration_cast<std::chrono::microseconds>(
-                         (time_step2 - time_step1)))
-                        .count()) /
-                       10e6
-                << " seconds" << std::endl;
 
-            time_step2 = time_step1;
+            time_step1 = time_step2;
             counter = 0;
         }
 
@@ -196,8 +191,12 @@ int main(int argc, char* argv[]) {
         // Output
         print_partition_to_file_buffered(
             partition, partition_size, out_file_partitions_txt, buffer);
-        out_file_resrel_bin.write(reinterpret_cast<const char*>(&res), sizeof(res)); 
-        out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel), sizeof(rel)); 
+
+        out_file_resrel_bin.write(reinterpret_cast<const char*>(&res),
+                                  sizeof(res));
+
+        out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),
+                                  sizeof(rel));
 
         // Generate the next partition
         execution_completed = nexpar_ptr(partition, partition_size);
@@ -229,7 +228,7 @@ int main(int argc, char* argv[]) {
         buffer.clear();
     }
 
-    time_step1 = std::chrono::steady_clock::now();
+    time_step2 = std::chrono::steady_clock::now();
     std::cout << std::setw(10) << std::right
 
               << std::setprecision(custom1_float_precision) << std::fixed
@@ -237,11 +236,7 @@ int main(int argc, char* argv[]) {
 
               << std::setw(10) << std::right
               << std::setprecision(custom2_float_precision) << std::scientific
-
-              << ((std::chrono::duration_cast<std::chrono::microseconds>(
-                       (time_step2 - time_step1)))
-                      .count()) /
-                     10e6
+              << std::chrono::duration<double>(time_step2 - time_step1).count()
               << " seconds" << std::endl;
 
 
@@ -249,15 +244,12 @@ int main(int argc, char* argv[]) {
 
     std::cout << std::endl;
     std::cout << "Execution time : "
-              << ((std::chrono::duration_cast<std::chrono::microseconds>(
-                       (time_step1 - start)))
-                      .count()) /
-                     10e6
+              << std::chrono::duration<double>(time_step2 - start).count()
               << " seconds" << std::endl;
 
     std::cout << std::endl;
-    std::cout << "----------------------------" << std::endl;
 
+    std::cout << "----------------------------" << std::endl;
 
     // Max and Min Relevance and Resolution
 

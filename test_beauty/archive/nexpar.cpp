@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
 
     do {
         if (counter > (status_bar * ten_percent)) {
-            time_step1 = std::chrono::steady_clock::now();
+            time_step2 = std::chrono::steady_clock::now();
             std::cout
                 << status_bar << "0% : "
                 << ((std::chrono::duration_cast<std::chrono::microseconds>(
