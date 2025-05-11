@@ -72,10 +72,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::ifstream input_file_colors_bin(path + filename + "_resrel.bin",
+    std::ifstream input_file_colors_bin(path + filename + "_colors.bin",
                                         std::ios::binary);
 
-    if (!input_file_resrel_bin) {
+    if (!input_file_colors_bin) {
         std::cerr << RED << "Error: Could not open file " << path + filename
                   << "_colors.bin"
                   << " for reading." << RESET_STYLE << std::endl;
@@ -116,6 +116,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+
     std::ofstream output_file_colors_bin(
         path + "[" + real_t_without_trailing_zeros(res_min) + "," +
             real_t_without_trailing_zeros(res_max) + "]_" + filename +
@@ -149,13 +150,44 @@ int main(int argc, char* argv[]) {
 
     while (true) {
 
-        input_file_resrel_bin.read(reinterpret_cast<char*>(&res), size_real_t);
-        input_file_resrel_bin.read(reinterpret_cast<char*>(&rel), size_real_t);
+        // if (!input_file_resrel_bin.read(reinterpret_cast<char*>(&res),
+        //                                 size_real_t)) {
+        //     std::cerr << RED << "Error: Invalid value in " << path + filename
+        //               << "_resrel.bin"
+        //               << " for reading." << RESET_STYLE << std::endl;
+        //     return 1;
+        // }
+        input_file_resrel_bin.read(reinterpret_cast<char*>(&res),
+        size_real_t);
+
+        // if (!input_file_resrel_bin.read(reinterpret_cast<char*>(&rel),
+        //                                 size_real_t)) {
+        //     std::cerr << RED << "Error: Invalid value in " << path + filename
+        //               << "_resrel.bin"
+        //               << " for reading." << RESET_STYLE << std::endl;
+        //     return 1;
+        // }
+        input_file_resrel_bin.read(reinterpret_cast<char*>(&rel),
+        size_real_t);
+
+
+        // if (!input_file_colors_bin.read(reinterpret_cast<char*>(&n_colors),
+        //                                 size_u_int)) {
+        //     std::cerr << RED << "Error: Invalid value in " << (path + filename)
+        //               << "_colors.bin"
+        //               << " for reading." << RESET_STYLE << std::endl;
+        //     return 1;
+        // }
         input_file_colors_bin.read(reinterpret_cast<char*>(&n_colors),
                                    size_u_int);
 
-        std::cout << "n_colors : " << n_colors << std::endl;
 
+        // if (!getline(input_file_partitions_txt, partition)) {
+        //     std::cerr << RED << "Error: Invalid line in " << (path + filename)
+        //               << ".txt"
+        //               << " for reading." << RESET_STYLE << std::endl;
+        //     return 1;
+        // }
         getline(input_file_partitions_txt, partition);
 
         if (input_file_resrel_bin.eof()) {

@@ -1,4 +1,3 @@
-from os import replace
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -202,25 +201,22 @@ def main():
     rel_vals = np.array(rel_vals)
     n_colors_vals = np.array(n_colors_vals)
 
-    sample_size = min(10, len(res_vals))
+    sample_size = min(50000, len(res_vals))
     indices_sample = np.random.choice(len(res_vals), size=sample_size, replace=False)
 
     res_vals_sample = res_vals[indices_sample]
     rel_vals_sample = rel_vals[indices_sample]
     n_colors_vals_sample = n_colors_vals[indices_sample]
 
-    # scatter_colors = plt.scatter(
-    #     res_vals, rel_vals, c=n_colors_vals, cmap="viridis", alpha=0.7, marker=".", s=2
-    # )
 
     scatter_colors = plt.scatter(
         res_vals_sample,
         rel_vals_sample,
         c=n_colors_vals_sample,
         cmap="viridis",
-        alpha=0.7,
+        # alpha=0.7,
         marker=".",
-        s=4,
+        # s=4,
     )
 
     # Add a colorbar to show the mapping from z-value to color:
@@ -235,6 +231,7 @@ def main():
         + "    Points shown : "
         + str(sample_size)
     )
+
     plt.xlabel("Resolution")
     plt.ylabel("Relevance")
     plt.xticks(rotation=60, ha="right")
@@ -246,9 +243,11 @@ def main():
 
     plt.show()
 
-    # Plot the histogram
 
-    plt.hist(n_colors_vals, bins=n, edgecolor="black")  # 'bins' controls number of bars
+    # Plot the histogram
+    n_bins = int(np.max(n_colors_vals_sample) - np.min(n_colors_vals_sample) + 1)
+    plt.hist(n_colors_vals_sample, bins=n_bins, edgecolor="black")
+    # plt.hist(n_colors_vals_sample, bins=n, edgecolor="black")
     plt.title("Histogram Number of Colors")
     plt.xlabel("Colors")
     plt.ylabel("Frequency")
