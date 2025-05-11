@@ -72,6 +72,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    std::ifstream input_file_colors_bin(path + filename + "_resrel.bin",
+                                        std::ios::binary);
+
+    if (!input_file_resrel_bin) {
+        std::cerr << RED << "Error: Could not open file " << path + filename
+                  << "_colors.bin"
+                  << " for reading." << RESET_STYLE << std::endl;
+        return 1;
+    }
+
 
     /* ------------------------ Open Output Files --------------------------- */
 
@@ -106,12 +116,31 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    std::ofstream output_file_colors_bin(
+        path + "[" + real_t_without_trailing_zeros(res_min) + "," +
+            real_t_without_trailing_zeros(res_max) + "]_" + filename +
+            "_colors.bin",
+        std::ios::binary);
+
+    if (!output_file_colors_bin) {
+        std::cerr << RED << "Error: Could not open file "
+                  << (path + "[" + real_t_without_trailing_zeros(res_min) +
+                      "," + real_t_without_trailing_zeros(res_max) + "]_" +
+                      filename + "_colors.bin")
+                  << " for writing." << RESET_STYLE << std::endl;
+        return 1;
+    }
+
 
     /* ----------------------- Reading from File --------------------------- */
 
 
     real_t res { -1 }, rel { -1 };
     const unsigned int size_real_t { sizeof(res) };
+
+    unsigned int n_colors { 0 };
+    const unsigned int size_u_int { sizeof(n_colors) };
+
 
     std::string partition(2 * partition_size, '\0');
 
@@ -122,8 +151,13 @@ int main(int argc, char* argv[]) {
 
     while (true) {
 
-        input_file_resrel_bin.read(reinterpret_cast<char*>(&res), sizeof(res));
-        input_file_resrel_bin.read(reinterpret_cast<char*>(&rel), sizeof(rel));
+        input_file_resrel_bin.read(reinterpret_cast<char*>(&res), size_real_t);
+        input_file_resrel_bin.read(reinterpret_cast<char*>(&rel), size_real_t);
+        input_file_colors_bin.read(reinterpret_cast<char*>(&n_colors),
+                                   size_u_int);
+
+        std::cout << "n_colors : " << n_colors << std::endl;
+
         getline(input_file_partitions_txt, partition);
 
         if (input_file_resrel_bin.eof()) {
@@ -135,6 +169,8 @@ int main(int argc, char* argv[]) {
                                          size_real_t);
             output_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),
                                          size_real_t);
+            output_file_colors_bin.write(
+                reinterpret_cast<const char*>(&n_colors), size_u_int);
 
             buffer += partition + "\n";
 
@@ -152,9 +188,11 @@ int main(int argc, char* argv[]) {
 
     input_file_partitions_txt.close();
     input_file_resrel_bin.close();
+    input_file_colors_bin.close();
 
     output_file_partitions_txt.close();
     output_file_resrel_bin.close();
+    output_file_colors_bin.close();
 
     return 0;
 }

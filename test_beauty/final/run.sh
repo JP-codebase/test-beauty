@@ -77,6 +77,7 @@ fi
 echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE} "
 
 python res_rel_plot.py ${size} 2> >(grep -v '^MESA-INTEL:' >&2) &
+# python res_rel_plot.py ${size} ${res_min} ${res_max} 
 
 echo
 echo "--------------------------------------------------"
@@ -92,7 +93,7 @@ while true; do
 
     # Check if input is a number
     if [[ "$res_min" =~ ^[+-]?([0-9]+(\.[0-9]+)?|\.[0-9]+)$ ]]; then
-      if (( $(bc -l <<< "$res_min > 0") )); then
+      if (( $(bc -l <<< "$res_min >= 0") )); then
         break
       else 
         echo -e "${RED_TEXT}Error: Please enter a positive number.${RESET_STYLE}"
@@ -109,7 +110,7 @@ while true; do
     # Check if input is a number
     if [[ "$res_max" =~ ^[+-]?([0-9]+(\.[0-9]+)?|\.[0-9]+)$ ]]; then
       if (( $(bc -l <<< "$res_max > 0") )); then
-          if (( $(bc -l <<< "$res_max > $res_min") )); then
+          if (( $(bc -l <<< "$res_max >= $res_min") )); then
               break
           else
             echo -e "${RED_TEXT}Error: Max must be greater than min:${RESET_STYLE} ${res_min}"
@@ -136,6 +137,7 @@ fi
 echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE} "
 
 python res_rel_plot.py ${size} ${res_min} ${res_max} 2> >(grep -v '^MESA-INTEL:' >&2) &
+# python res_rel_plot.py ${size} ${res_min} ${res_max} 
 
 echo
 echo "--------------------------------------------------"

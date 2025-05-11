@@ -210,6 +210,7 @@ int main(int argc, char* argv[]) {
 
         out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),
                                   sizeof(rel));
+        
         out_file_colors_bin.write(reinterpret_cast<const char*>(&n_colors),
                                   sizeof(n_colors));
 
@@ -232,6 +233,8 @@ int main(int argc, char* argv[]) {
         } else if (rel > max_relevance) {
             max_relevance = rel;
         }
+        
+        n_colors = number_of_colors_partition(partition, partition_size);
 
     } while (!execution_completed);
 
