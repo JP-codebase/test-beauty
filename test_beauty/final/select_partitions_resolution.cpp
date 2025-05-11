@@ -141,9 +141,7 @@ int main(int argc, char* argv[]) {
     unsigned int n_colors { 0 };
     const unsigned int size_u_int { sizeof(n_colors) };
 
-
     std::string partition(2 * partition_size, '\0');
-
 
     std::string buffer {};
     unsigned int buffer_limit { 1024 };

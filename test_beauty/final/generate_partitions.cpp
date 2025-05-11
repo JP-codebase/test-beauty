@@ -174,6 +174,10 @@ int main(int argc, char* argv[]) {
 
     // Starting the loop. It ends when reaches the partition [ 1, 1, ..., 1 ]
     bool execution_completed = false;
+
+    const unsigned int size_real_t { sizeof(res) };
+    const unsigned int size_u_int { sizeof(n_colors) };
+
     do {
 
         // Chrono
@@ -206,13 +210,13 @@ int main(int argc, char* argv[]) {
             partition, partition_size, out_file_partitions_txt, buffer);
 
         out_file_resrel_bin.write(reinterpret_cast<const char*>(&res),
-                                  sizeof(res));
+                                  size_real_t);
 
         out_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),
-                                  sizeof(rel));
-        
+                                  size_real_t);
+
         out_file_colors_bin.write(reinterpret_cast<const char*>(&n_colors),
-                                  sizeof(n_colors));
+                                  size_u_int);
 
         // Generate the next partition
         execution_completed = nexpar_ptr(partition, partition_size);
@@ -233,7 +237,7 @@ int main(int argc, char* argv[]) {
         } else if (rel > max_relevance) {
             max_relevance = rel;
         }
-        
+
         n_colors = number_of_colors_partition(partition, partition_size);
 
     } while (!execution_completed);
