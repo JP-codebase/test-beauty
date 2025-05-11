@@ -28,8 +28,8 @@ else
   echo -e "${bold}${red_text}Compilation failed."
 fi
 
-echo -e "select_partition.cpp : \c"
-${compiler} select_partitions_resolution.cpp ./headers/quantifying_information.cpp ./headers/nexpar_functions.cpp -o select_partitions_resolution.out -DREAL_IS_DOUBLE 
+echo -e "select_partitions.cpp : \c"
+${compiler} select_partitions.cpp ./headers/quantifying_information.cpp ./headers/nexpar_functions.cpp -o select_partitions.out -DREAL_IS_DOUBLE 
 
 if [ $? -eq 0 ]; then
   echo -e "${bold}${green_text}Compilation complete.${reset_style}"

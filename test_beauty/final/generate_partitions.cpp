@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
         std::cin >> input;
 
         if (input != "Y" && input != "y") {
-            std::cout << "Execution terminated." << std::endl;
+            std::cerr << "Execution terminated." << std::endl;
             return 1;
         }
     }

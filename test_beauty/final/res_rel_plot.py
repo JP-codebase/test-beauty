@@ -161,28 +161,6 @@ def main():
             + str(n)
         )
 
-        # filename_resrel = (
-        #     path
-        #     + "["
-        #     + f"{res_left_bound:g}"
-        #     + ","
-        #     + f"{res_right_bound:g}"
-        #     + "]_"
-        #     + filename
-        #     + "_resrel.bin"
-        # )
-        #
-        # filename_colors = (
-        #     path
-        #     + "["
-        #     + f"{res_left_bound:g}"
-        #     + ","
-        #     + f"{res_right_bound:g}"
-        #     + "]_"
-        #     + filename
-        #     + "_colors.bin"
-        # )
-
         res_vals, rel_vals = read_resrel_bin(
             path + filename + "_resrel.bin", "d", sample_fraction
         )
@@ -194,9 +172,22 @@ def main():
         print("Error: Too many arguments")
         sys.exit(1)
 
-    # ---------------------- Print plot ------------------------
-    plt.figure(figsize=(12, 10))
+    # ---------------------- Resolution-Relevance Plot ------------------------
 
+    # plt.figure(figsize=(6, 5))
+
+    fig, (ax1, ax2) = plt.subplots(
+        1,
+        2,
+        figsize=(12, 5),
+        gridspec_kw={
+            "width_ratios": [2, 1],  # left: 1 unit, right: 2 units
+            "wspace": 0.25,
+        },
+        # constrained_layout=True
+    )
+
+    # Left
     res_vals = np.array(res_vals)
     rel_vals = np.array(rel_vals)
     n_colors_vals = np.array(n_colors_vals)
@@ -208,8 +199,17 @@ def main():
     rel_vals_sample = rel_vals[indices_sample]
     n_colors_vals_sample = n_colors_vals[indices_sample]
 
+    # scatter_colors = plt.scatter(
+    #     res_vals_sample,
+    #     rel_vals_sample,
+    #     c=n_colors_vals_sample,
+    #     cmap="viridis",
+    #     # alpha=0.7,
+    #     marker=".",
+    #     # s=4,
+    # )
 
-    scatter_colors = plt.scatter(
+    scatter_colors = ax1.scatter(
         res_vals_sample,
         rel_vals_sample,
         c=n_colors_vals_sample,
@@ -220,40 +220,60 @@ def main():
     )
 
     # Add a colorbar to show the mapping from z-value to color:
-    cbar = plt.colorbar(scatter_colors)
+    # cbar = plt.colorbar(scatter_colors)
+    cbar = fig.colorbar(scatter_colors)
     cbar.set_label("Number of colors")
 
-    plt.title(
-        "n = "
+    # plt.title(
+    #     "n = "
+    #     + str(n)
+    #     + "    N. Partitions ~ "
+    #     + str(int(len(res_vals) / sample_fraction))
+    #     + "    Points shown : "
+    #     + str(sample_size)
+    # )
+
+    ax1.set(
+        title="n = "
         + str(n)
         + "    N. Partitions ~ "
         + str(int(len(res_vals) / sample_fraction))
         + "    Points shown : "
-        + str(sample_size)
+        + str(sample_size),
+        xlabel="Resolution",
+        ylabel="Relevance",
     )
+    # ax1.xticks(rotation=60, ha="right")
 
-    plt.xlabel("Resolution")
-    plt.ylabel("Relevance")
-    plt.xticks(rotation=60, ha="right")
+    # Edit Axis
+    # plt.xlabel("Resolution")
+    # plt.ylabel("Relevance")
+    # plt.xticks(rotation=60, ha="right")
 
-    plt.grid(True)
+    # plt.grid(True)
+    ax1.grid(True)
 
-    plt.tight_layout()
-    plt.savefig(path + filename + "_resrel.svg", format="svg", dpi="figure")
+    # plt.tight_layout()
+    # plt.savefig(path + filename + "_resrel.svg", format="svg", dpi="figure")
 
-    plt.show()
+    # Right : Plot the histogram
+    # plt.figure(figsize=(6, 5))
 
-
-    # Plot the histogram
-    n_bins = int(np.max(n_colors_vals_sample) - np.min(n_colors_vals_sample) + 1)
-    plt.hist(n_colors_vals_sample, bins=n_bins, edgecolor="black")
+    # n_bins = int(np.max(n_colors_vals_sample) - np.min(n_colors_vals_sample) + 1)
     # plt.hist(n_colors_vals_sample, bins=n, edgecolor="black")
-    plt.title("Histogram Number of Colors")
-    plt.xlabel("Colors")
-    plt.ylabel("Frequency")
-    plt.grid(True)
+    # plt.title("Histogram Number of Colors")
+    # plt.xlabel("Colors")
+    # plt.ylabel("Frequency")
+    # plt.grid(True)
+
+    n_bins = int(np.max(n_colors_vals_sample) - np.min(n_colors_vals_sample) + 1)
+    ax2.hist(n_colors_vals_sample, bins=n_bins, edgecolor="black")
+    ax2.set(title="Histogram Number of Colors", xlabel="Colors", ylabel="Frequency")
+    ax2.grid(True)
 
     # Show the plot
+    # plt.tight_layout()
+    plt.savefig(path + filename + "_resrel.svg", format="svg", dpi="figure")
     plt.show()
 
 

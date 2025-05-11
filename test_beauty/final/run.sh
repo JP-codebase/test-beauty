@@ -74,10 +74,14 @@ fi
 
 # ---------------- Res_Rel Plot ----------------------
 
-echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE} "
+echo 
+echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE}"
+echo -e "Wait. A plot will be shown."
 
 python res_rel_plot.py ${size} 2> >(grep -v '^MESA-INTEL:' >&2) &
 # python res_rel_plot.py ${size} ${res_min} ${res_max} 
+
+sleep 0.5
 
 echo
 echo "--------------------------------------------------"
@@ -124,7 +128,7 @@ while true; do
 done
 
 
-./select_partitions_resolution.out ${size} ${res_min} ${res_max}
+./select_partitions_resolution_colors.out ${size} ${res_min} ${res_max}
 
 
 if [ $? != 0 ]; then
@@ -134,10 +138,14 @@ fi
 
 # ---------------- Res_Rel Plot ----------------------
 
+echo 
 echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE} "
+echo "Wait. A plot will be shown"
 
 python res_rel_plot.py ${size} ${res_min} ${res_max} 2> >(grep -v '^MESA-INTEL:' >&2) &
 # python res_rel_plot.py ${size} ${res_min} ${res_max} 
+
+sleep 0.5
 
 echo
 echo "--------------------------------------------------"
