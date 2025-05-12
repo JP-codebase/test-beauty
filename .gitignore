@@ -1,7 +1,11 @@
 partitions/*
 partitions
 *.out
+
 *.png
 *.svg
+
 *.bin
+*.txt
+
 *.null-ls*

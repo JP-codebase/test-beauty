@@ -1,5 +1,3 @@
-#include <algorithm>
-#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -10,13 +8,31 @@
 #include "./headers/precision.h"
 #include "./headers/quantifying_information.h"
 
+std::string real_t_without_trailing_zeros(real_t f);
+
+unsigned int random_int_range(unsigned int n);
+
+void random_colored_grid_filling(unsigned int* colored_grid,
+                                 std::vector<unsigned int>& partition,
+                                 unsigned int array_size);
+
+
+/* ------------------------ Constants --------------------------------- */
+
 const char RED[] = "\033[31m";
 const char RESET_STYLE[] = "\033[m";
 
-std::string real_t_without_trailing_zeros(real_t f);
-
 const real_t beta = 0.0005;
 const char boundary_conditions { 'o' };
+
+std::random_device seed;   // Random seed
+
+std::minstd_rand generator(seed());   // Linear congruential engine that
+                                      // generates random numbers using a seed
+
+std::uniform_int_distribution<unsigned int> int_distribution(0, 100);
+std::uniform_real_distribution<real_t> real_distribution(0.0, 1.0);
+
 
 int main(int argc, char* argv[]) {
 
@@ -97,7 +113,8 @@ int main(int argc, char* argv[]) {
         }
 
         if (iss.fail() && !iss.eof()) {
-            std::cerr << RED << "Error : Non-integer data found on line " << line << "\n";
+            std::cerr << RED << "Error : Non-integer data found on line "
+                      << line << "\n";
             continue;
         }
         partition_list.push_back(std::move(partition));
@@ -115,26 +132,27 @@ int main(int argc, char* argv[]) {
 
         if (!output_file_colored_grid_txt) {
             std::cerr << RED << "Error : Could not open "
-                      << ("./images/" + std::to_string(p + 1) + "_" +
-                      filename +
+                      << ("./images/" + std::to_string(p + 1) + "_" + filename +
                           ".txt")
                       << " for writing." << RESET_STYLE << std::endl;
         }
 
 
-        // Filling the colored_grid
+        random_colored_grid_filling(
+            colored_grid, partition_list[p], partition_size);
 
-        {
-            unsigned int* colored_grid_index { colored_grid };
-            for (int i = 0; i < partition_size; i++) {
-                for (int j = 0; j < partition_list[p][i]; j++) {
-                    *colored_grid_index = i;
-                    colored_grid_index++;
-                }
-            }
+        for (int j = 0; j < partition_size; j++) {
+            output_file_colored_grid_txt << colored_grid[j] << " ";
         }
+        output_file_colored_grid_txt << "\n";
 
         // std::cout << p << " : ";
+        //
+        // for (int j = 0; j < partition_size; j++) {
+        //     std::cout << partition_list[p][j] << ' ';
+        // }
+        // std::cout << "\t";
+        //
         // for (int j = 0; j < partition_size; j++) {
         //     std::cout << colored_grid[j] << ' ';
         // }
@@ -167,4 +185,35 @@ std::string real_t_without_trailing_zeros(real_t f) {
     }
 
     return real_t_str;
+}
+
+
+unsigned int random_int_range(unsigned int n) {
+
+    int_distribution.param(
+        typename decltype(int_distribution)::param_type { 0, n });
+    return int_distribution(generator);
+};
+
+
+void random_colored_grid_filling(unsigned int* colored_grid,
+                                 std::vector<unsigned int>& partition,
+                                 unsigned int array_size) {
+
+
+    // Not-yet colored cells list
+    std::vector<unsigned int> list(array_size);
+    for (unsigned int i = 0; i < array_size; i++) {
+        list[i] = i;
+    }
+
+    // A random cell is colored using the color partition[i]
+    int temp;
+    for (unsigned int i = 0; i < array_size; i++) {
+        for (unsigned int j = 0; j < partition[i]; j++) {
+            temp = random_int_range(size(list) - 1);
+            colored_grid[list[temp]] = i;
+            list.erase(list.begin() + temp);
+        }
+    }
 }
