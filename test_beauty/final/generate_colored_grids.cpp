@@ -1,0 +1,170 @@
+#include <algorithm>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "./headers/precision.h"
+#include "./headers/quantifying_information.h"
+
+const char RED[] = "\033[31m";
+const char RESET_STYLE[] = "\033[m";
+
+std::string real_t_without_trailing_zeros(real_t f);
+
+const real_t beta = 0.0005;
+const char boundary_conditions { 'o' };
+
+int main(int argc, char* argv[]) {
+
+    /* ------------------------ Input Check --------------------------------- */
+
+    unsigned int width {};
+    unsigned int height {};
+
+    unsigned int n_colors {};
+
+    real_t res_min {};
+    real_t res_max {};
+
+    // Command line arguments
+    {
+        if (argc != 6) {
+            std::cerr << RED << "Error: Expected 5 arguments: " << RESET_STYLE
+                      << "width height resolution_min resolution_max n_colors. "
+                      << RED << "Got : " << RESET_STYLE << (argc - 1)
+                      << std::endl;
+            return 1;
+        }
+
+        try {
+            width = std::stoul(argv[1]);
+            height = std::stoul(argv[2]);
+            res_min = std::stod(argv[3]);
+            res_max = std::stod(argv[4]);
+            n_colors = std::stoul(argv[5]);
+
+            if (res_min < 0 || res_max < 0 || res_min > res_max)
+                throw std::out_of_range("Min and Max must be ≥0 and Min ≤ Max");
+        } catch (const std::invalid_argument&) {
+            std::cerr << RED << "Error: Arguments must be numeric.\n"
+                      << RESET_STYLE;
+            return 1;
+        } catch (const std::out_of_range& e) {
+            std::cerr << RED << "Error: " << e.what() << "\n" << RESET_STYLE;
+            return 1;
+        }
+    }
+
+    unsigned int partition_size { width * height };
+
+    /* --------------------- Open Input Files --------------------------- */
+
+    std::string path { "./partitions/" };
+    std::string filename { "c" + std::to_string(n_colors) + "_[" +
+                           real_t_without_trailing_zeros(res_min) + "," +
+                           real_t_without_trailing_zeros(res_max) + "]_" +
+                           "partitions_of_" + std::to_string(partition_size) };
+
+
+    // Input from txt file
+    std::ifstream input_file_partitions_txt(path + filename + ".txt");
+
+    if (!input_file_partitions_txt) {
+        std::cerr << RED << "Error: Could not open " << path + filename
+                  << ".txt"
+                  << " for reading." << RESET_STYLE << std::endl;
+        return 1;
+    }
+
+
+    /* --------------- Reading Selected Partitions from File ---------------- */
+
+
+    std::string line;
+    std::vector<std::vector<unsigned int>> partition_list;
+
+    while (std::getline(input_file_partitions_txt, line)) {
+        std::istringstream iss(line);
+        std::vector<unsigned int> partition;
+        unsigned int x;
+
+        while (iss >> x) {
+            partition.push_back(x);
+        }
+
+        if (iss.fail() && !iss.eof()) {
+            std::cerr << RED << "Error : Non-integer data found on line " << line << "\n";
+            continue;
+        }
+        partition_list.push_back(std::move(partition));
+    }
+
+
+    /* ------------------------ Main Loop --------------------------- */
+
+    unsigned int* colored_grid { new unsigned int[partition_size] };
+
+    for (int p = 0; p < partition_list.size(); p++) {
+
+        std::ofstream output_file_colored_grid_txt(
+            "./images/" + std::to_string(p + 1) + "_" + filename + ".txt");
+
+        if (!output_file_colored_grid_txt) {
+            std::cerr << RED << "Error : Could not open "
+                      << ("./images/" + std::to_string(p + 1) + "_" +
+                      filename +
+                          ".txt")
+                      << " for writing." << RESET_STYLE << std::endl;
+        }
+
+
+        // Filling the colored_grid
+
+        {
+            unsigned int* colored_grid_index { colored_grid };
+            for (int i = 0; i < partition_size; i++) {
+                for (int j = 0; j < partition_list[p][i]; j++) {
+                    *colored_grid_index = i;
+                    colored_grid_index++;
+                }
+            }
+        }
+
+        // std::cout << p << " : ";
+        // for (int j = 0; j < partition_size; j++) {
+        //     std::cout << colored_grid[j] << ' ';
+        // }
+        // std::cout << std::endl;
+
+        output_file_colored_grid_txt.close();
+    }
+
+
+    return 0;
+}
+
+/* ---------------------- Function Implementations ------------------------- */
+
+std::string real_t_without_trailing_zeros(real_t f) {
+
+    std::string real_t_str { std::to_string(f) };
+
+    for (int i = real_t_str.size() - 1; i >= 0; i--) {
+
+        if (real_t_str[i] == '0' || real_t_str[i] == '.') {
+            real_t_str.erase(i);
+
+        } else if ((real_t_str[i] == '1') || (real_t_str[i] == '2') ||
+                   (real_t_str[i] == '3') || (real_t_str[i] == '4') ||
+                   (real_t_str[i] == '5') || (real_t_str[i] == '6') ||
+                   (real_t_str[i] == '7') || (real_t_str[i] == '8') ||
+                   (real_t_str[i] == '9'))
+            break;
+    }
+
+    return real_t_str;
+}

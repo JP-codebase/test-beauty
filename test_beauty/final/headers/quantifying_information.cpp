@@ -199,7 +199,7 @@ unsigned int number_of_colors_partition(unsigned int* partition,
 
     unsigned int n_colors { 0 };
 
-    for (n_colors; n_colors < partition_size; n_colors++) {
+    for (; n_colors < partition_size; n_colors++) {
         if (partition[n_colors] == 0) {
             return n_colors;
         }

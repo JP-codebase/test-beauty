@@ -273,7 +273,7 @@ def main():
 
     # Show the plot
     # plt.tight_layout()
-    plt.savefig(path + filename + "_resrel.svg", format="svg", dpi="figure")
+    plt.savefig("./images/" + filename + "_resrel.svg", format="svg", dpi="figure")
     plt.show()
 
 

@@ -12,8 +12,7 @@ std::string real_t_without_trailing_zeros(real_t f);
 
 int main(int argc, char* argv[]) {
 
-    /* ------------------------ Variable Declarations
-     * --------------------------------- */
+    /* ------------------- Variable Declarations --------------------------- */
 
     unsigned int partition_size {};
     unsigned int n_colors {};
@@ -114,13 +113,13 @@ int main(int argc, char* argv[]) {
     }
 
     // Output to binary file
-    std::ofstream output_file_resrel_bin(path + "c" + std::to_string(n_colors) +
-                                             "_" + filename + "_resrel.bin",
-                                         std::ios::binary);
+    std::ofstream output_file_resrel_txt(path + "c" + std::to_string(n_colors) +
+                                         "_" + filename + "_resrel.txt");
 
-    if (!output_file_resrel_bin) {
+
+    if (!output_file_resrel_txt) {
         std::cerr << RED << "Error: Could not open file "
-                  << (path + "c" + "_" + filename + "_resrel.bin")
+                  << (path + "c" + "_" + filename + "_resrel.txt")
                   << " for writing." << RESET_STYLE << std::endl;
         return 1;
     }
@@ -205,28 +204,17 @@ int main(int argc, char* argv[]) {
     unsigned int step {};
     step = (rel_list_ordered.size() / n_partitions);
 
-    std::string buffer {};
-    unsigned int buffer_limit { 1024 };
-
-
-    for (int i = 0; i < rel_list_ordered.size(); i = i +  step) {
-
-        output_file_resrel_bin.write(
-            reinterpret_cast<const char*>(&res_list_ordered[i]), size_real_t);
-        output_file_resrel_bin.write(
-            reinterpret_cast<const char*>(&rel_list_ordered[i]), size_real_t);
-
-        buffer += partition_list_ordered[i] + "\n";
-
-        if (buffer.size() >= buffer_limit) {
-            output_file_partitions_txt << buffer;
-            buffer.clear();
-        }
+    if (step * n_partitions != rel_list_ordered.size()) {
+        step++;
     }
 
-    if (!buffer.empty()) {
-        output_file_partitions_txt << buffer;
-        buffer.clear();
+
+    for (int i = 0; i < rel_list_ordered.size(); i = i + step) {
+
+        output_file_resrel_txt << res_list_ordered[i] << " "
+                               << rel_list_ordered[i] << "\n";
+
+        output_file_partitions_txt << (partition_list_ordered[i] + "\n");
     }
 
     input_file_partitions_txt.close();
@@ -234,7 +222,7 @@ int main(int argc, char* argv[]) {
     input_file_colors_bin.close();
 
     output_file_partitions_txt.close();
-    output_file_resrel_bin.close();
+    output_file_resrel_txt.close();
 
     return 0;
 }

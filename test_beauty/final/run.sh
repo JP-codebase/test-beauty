@@ -13,8 +13,13 @@ RED_TEXT="\033[31m"
 
 # --------------- Starting ----------------------
 
+mkdir -p ./partitions
+mkdir -p ./images
+
 echo -e "${BOLD}${YELLOW_TEXT}Script for generating coloured with same resolution, energy and number of colours, but different relevance.${RESET_STYLE} "
 
+
+# --------------- Grid Size ----------------------
 
 echo 
 echo -e "${BOLD}Grid size.${RESET_STYLE}"
@@ -53,7 +58,6 @@ while true; do
 done
 
 let size=width*height
-mkdir -p ./partitions
 
 
 # --------------- Generate partitions -------------
@@ -197,11 +201,11 @@ done
 
 # ---------------- Res_Rel Plot : Selected by Number of Colors ----------------------
 
-echo 
-echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE}"
-echo -e "Wait. A plot will be shown."
-
-python res_rel_colors.py ${size} ${res_min} ${res_max} ${n_colors} 2> >(grep -v '^MESA-INTEL:' >&2) &
-# python res_rel_plot.py ${size} ${res_min} ${res_max} 
-
-sleep 0.8
+# echo 
+# echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE}"
+# echo -e "Wait. A plot will be shown."
+#
+# python res_rel_colors.py ${size} ${res_min} ${res_max} ${n_colors} 2> >(grep -v '^MESA-INTEL:' >&2) &
+# # python res_rel_plot.py ${size} ${res_min} ${res_max} 
+#
+# sleep 0.8

@@ -11,13 +11,14 @@ red_text="\e[31m"
 
 # --------------------- Compilers -----------------------------
 
-compiler="g++"
-# compiler="clang++"
+# compiler="g++"
+compiler="clang++"
 
 
 # --------------------- Start Compiling -----------------------
 
 echo -e "Compiling ..."
+
 
 echo -e "generate_partition.cpp : \c"
 ${compiler} generate_partitions.cpp ./headers/quantifying_information.cpp ./headers/nexpar_functions.cpp -o generate_partitions.out -DREAL_IS_DOUBLE 
@@ -28,6 +29,7 @@ else
   echo -e "${bold}${red_text}Compilation failed."
 fi
 
+
 echo -e "select_partitions.cpp : \c"
 ${compiler} select_partitions.cpp  -o select_partitions.out -DREAL_IS_DOUBLE 
 
@@ -37,8 +39,19 @@ else
   echo -e "${bold}${red_text}Compilation failed."
 fi
 
+
 echo -e "select_partitions_colors.cpp : \c"
 ${compiler} select_partitions_colors.cpp  -o select_partitions_colors.out -DREAL_IS_DOUBLE 
+
+if [ $? -eq 0 ]; then
+  echo -e "${bold}${green_text}Compilation complete.${reset_style}"
+else
+  echo -e "${bold}${red_text}Compilation failed."
+fi
+
+
+echo -e "generate_colored_grids.cpp : \c"
+${compiler} generate_colored_grids.cpp  -o generate_colored_grids.out -DREAL_IS_DOUBLE 
 
 if [ $? -eq 0 ]; then
   echo -e "${bold}${green_text}Compilation complete.${reset_style}"
