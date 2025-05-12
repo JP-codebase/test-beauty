@@ -243,7 +243,7 @@ def main():
         xlabel="Resolution",
         ylabel="Relevance",
     )
-    # ax1.xticks(rotation=60, ha="right")
+    ax1.tick_params(axis='x', rotation=60)
 
     # Edit Axis
     # plt.xlabel("Resolution")

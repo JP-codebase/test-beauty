@@ -1,28 +1,37 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "./headers/precision.h"
-
-
-std::string real_t_without_trailing_zeros(real_t f);
 
 const char RED[] = "\033[31m";
 const char RESET_STYLE[] = "\033[m";
 
+std::string real_t_without_trailing_zeros(real_t f);
+
 int main(int argc, char* argv[]) {
 
-    unsigned int partition_size;
-    real_t res_min, res_max;
+    /* ------------------------ Variable Declarations
+     * --------------------------------- */
 
+    unsigned int partition_size {};
+    unsigned int n_colors {};
+    unsigned int n_partitions;
+    real_t res_min {};
+    real_t res_max {};
+
+    std::vector<real_t> res_list;
+    std::vector<real_t> rel_list;
+    std::vector<std::string> partition_list;
 
     /* ------------------------ Input Check --------------------------------- */
 
     // Command line arguments
     {
-        if (argc != 4) {
-            std::cerr << RED << "Error: Expected 3 arguments: " << RESET_STYLE
-                      << "size resolution_min resolution_max. " << RED
+        if (argc != 6) {
+            std::cerr << RED << "Error: Expected 5 arguments: " << RESET_STYLE
+                      << "size resolution_min resolution_max n_colors. " << RED
                       << "Got : " << RESET_STYLE << (argc - 1) << std::endl;
             return 1;
         }
@@ -31,6 +40,9 @@ int main(int argc, char* argv[]) {
             partition_size = std::stoul(argv[1]);
             res_min = std::stod(argv[2]);
             res_max = std::stod(argv[3]);
+            n_colors = std::stoul(argv[4]);
+            n_partitions = std::stoul(argv[5]);
+
 
             if (res_min < 0 || res_max < 0 || res_min > res_max)
                 throw std::out_of_range("Min and Max must be ≥0 and Min ≤ Max");
@@ -44,12 +56,15 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
     std::string path { "./partitions/" };
+
 
     /* ------------------------ Open Input Files --------------------------- */
 
-    std::string filename = "partitions_of_" + std::to_string(partition_size);
+    std::string filename = "[" + real_t_without_trailing_zeros(res_min) + "," +
+                           real_t_without_trailing_zeros(res_max) + "]_" +
+                           "partitions_of_" + std::to_string(partition_size);
+
 
     // Input from txt file
     std::ifstream input_file_partitions_txt(path + filename + ".txt");
@@ -87,66 +102,39 @@ int main(int argc, char* argv[]) {
 
     // Output to txt file
     std::ofstream output_file_partitions_txt(
-        path + "[" + real_t_without_trailing_zeros(res_min) + "," +
-        real_t_without_trailing_zeros(res_max) + "]_" + filename + ".txt");
+        path + "c" + std::to_string(n_colors) + "_" + filename + ".txt");
 
 
     if (!output_file_partitions_txt) {
         std::cerr << RED << "Error: Could not open "
-                  << (path + "[" + real_t_without_trailing_zeros(res_min) +
-                      "," + real_t_without_trailing_zeros(res_max) + "]_" +
-                      filename + ".txt")
+                  << (path + "c" + std::to_string(n_colors) + "_" + filename +
+                      ".txt")
                   << " for writing." << RESET_STYLE << std::endl;
         return 1;
     }
 
     // Output to binary file
-    std::ofstream output_file_resrel_bin(
-        path + "[" + real_t_without_trailing_zeros(res_min) + "," +
-            real_t_without_trailing_zeros(res_max) + "]_" + filename +
-            "_resrel.bin",
-        std::ios::binary);
+    std::ofstream output_file_resrel_bin(path + "c" + std::to_string(n_colors) +
+                                             "_" + filename + "_resrel.bin",
+                                         std::ios::binary);
 
     if (!output_file_resrel_bin) {
         std::cerr << RED << "Error: Could not open file "
-                  << (path + "[" + real_t_without_trailing_zeros(res_min) +
-                      "," + real_t_without_trailing_zeros(res_max) + "]_" +
-                      filename + "_resrel.bin")
+                  << (path + "c" + "_" + filename + "_resrel.bin")
                   << " for writing." << RESET_STYLE << std::endl;
         return 1;
     }
 
 
-    std::ofstream output_file_colors_bin(
-        path + "[" + real_t_without_trailing_zeros(res_min) + "," +
-            real_t_without_trailing_zeros(res_max) + "]_" + filename +
-            "_colors.bin",
-        std::ios::binary);
-
-    if (!output_file_colors_bin) {
-        std::cerr << RED << "Error: Could not open file "
-                  << (path + "[" + real_t_without_trailing_zeros(res_min) +
-                      "," + real_t_without_trailing_zeros(res_max) + "]_" +
-                      filename + "_colors.bin")
-                  << " for writing." << RESET_STYLE << std::endl;
-        return 1;
-    }
-
-
-    /* ----------------------- Reading from File --------------------------- */
-
+    /* ----------------- Selecting by Color from File --------------------- */
 
     real_t res { -1 }, rel { -1 };
     const unsigned int size_real_t { sizeof(res) };
 
-    unsigned int n_colors { 0 };
+    unsigned int n_colors_read { 0 };
     const unsigned int size_u_int { sizeof(n_colors) };
 
     std::string partition(2 * partition_size, '\0');
-
-    std::string buffer {};
-    unsigned int buffer_limit { 1024 };
-
 
     while (true) {
 
@@ -154,7 +142,7 @@ int main(int argc, char* argv[]) {
 
         input_file_resrel_bin.read(reinterpret_cast<char*>(&rel), size_real_t);
 
-        input_file_colors_bin.read(reinterpret_cast<char*>(&n_colors),
+        input_file_colors_bin.read(reinterpret_cast<char*>(&n_colors_read),
                                    size_u_int);
 
         getline(input_file_partitions_txt, partition);
@@ -163,20 +151,76 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        if ((res_min <= res) && (res_max >= res)) {
-            output_file_resrel_bin.write(reinterpret_cast<const char*>(&res),
-                                         size_real_t);
-            output_file_resrel_bin.write(reinterpret_cast<const char*>(&rel),
-                                         size_real_t);
-            output_file_colors_bin.write(
-                reinterpret_cast<const char*>(&n_colors), size_u_int);
+        if (n_colors_read == n_colors) {
+            res_list.push_back(res);
+            rel_list.push_back(rel);
+            partition_list.push_back(partition);
+        }
+    }
 
-            buffer += partition + "\n";
 
-            if (buffer.size() >= buffer_limit) {
-                output_file_partitions_txt << buffer;
-                buffer.clear();
+    /* ----------------- Ordering Partitions by Relevance ------------------- */
+
+    if (n_partitions > res_list.size()) {
+        std::cout << "Error : There are no " << n_partitions
+                  << " partitions of " << n_colors << " colors." << "\nUsing "
+                  << res_list.size() << " as a fallback number." << std::endl;
+        n_partitions = res_list.size();
+    }
+
+    real_t max;
+    int index_max;
+
+    res_list.shrink_to_fit();
+    rel_list.shrink_to_fit();
+    partition_list.shrink_to_fit();
+
+    std::vector<real_t> res_list_ordered(res_list.size());
+    std::vector<real_t> rel_list_ordered(rel_list.size());
+    std::vector<std::string> partition_list_ordered(partition_list.size());
+
+    for (int i = rel_list.size() - 1; i >= 0; --i) {
+        max = rel_list[0];
+        index_max = 0;
+        for (int j = 0; j < i + 1; j++) {
+            if (rel_list[j] > max) {
+                max = rel_list[j];
+                index_max = j;
             }
+        }
+        // std::cout << i << " : " << "\tMax : " << max << std::endl;
+        res_list_ordered.at(i) = res_list.at(index_max);
+        res_list.erase(res_list.begin() + index_max);
+
+        rel_list_ordered.at(i) = rel_list.at(index_max);
+        rel_list.erase(rel_list.begin() + index_max);
+
+        partition_list_ordered.at(i) = partition_list.at(index_max);
+        partition_list.erase(partition_list.begin() + index_max);
+    }
+
+
+    /* --------------------- Output to Files ---------------------------- */
+
+    unsigned int step {};
+    step = (rel_list_ordered.size() / n_partitions);
+
+    std::string buffer {};
+    unsigned int buffer_limit { 1024 };
+
+
+    for (int i = 0; i < rel_list_ordered.size(); i = i +  step) {
+
+        output_file_resrel_bin.write(
+            reinterpret_cast<const char*>(&res_list_ordered[i]), size_real_t);
+        output_file_resrel_bin.write(
+            reinterpret_cast<const char*>(&rel_list_ordered[i]), size_real_t);
+
+        buffer += partition_list_ordered[i] + "\n";
+
+        if (buffer.size() >= buffer_limit) {
+            output_file_partitions_txt << buffer;
+            buffer.clear();
         }
     }
 
@@ -191,11 +235,9 @@ int main(int argc, char* argv[]) {
 
     output_file_partitions_txt.close();
     output_file_resrel_bin.close();
-    output_file_colors_bin.close();
 
     return 0;
 }
-
 
 /* ---------------------- Function Implementations ------------------------- */
 

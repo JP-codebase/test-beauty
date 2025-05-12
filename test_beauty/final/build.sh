@@ -29,7 +29,7 @@ else
 fi
 
 echo -e "select_partitions.cpp : \c"
-${compiler} select_partitions.cpp ./headers/quantifying_information.cpp ./headers/nexpar_functions.cpp -o select_partitions.out -DREAL_IS_DOUBLE 
+${compiler} select_partitions.cpp  -o select_partitions.out -DREAL_IS_DOUBLE 
 
 if [ $? -eq 0 ]; then
   echo -e "${bold}${green_text}Compilation complete.${reset_style}"
@@ -37,4 +37,11 @@ else
   echo -e "${bold}${red_text}Compilation failed."
 fi
 
-echo
+echo -e "select_partitions_colors.cpp : \c"
+${compiler} select_partitions_colors.cpp  -o select_partitions_colors.out -DREAL_IS_DOUBLE 
+
+if [ $? -eq 0 ]; then
+  echo -e "${bold}${green_text}Compilation complete.${reset_style}"
+else
+  echo -e "${bold}${red_text}Compilation failed."
+fi

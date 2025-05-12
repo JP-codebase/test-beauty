@@ -56,12 +56,11 @@ let size=width*height
 mkdir -p ./partitions
 
 
+# --------------- Generate partitions -------------
+
 echo
 echo "--------------------------------------------------"
 echo
-
-
-# --------------- Generate partitions -------------
 
 ./generate_partitions.out ${size}
 
@@ -81,15 +80,16 @@ echo -e "Wait. A plot will be shown."
 python res_rel_plot.py ${size} 2> >(grep -v '^MESA-INTEL:' >&2) &
 # python res_rel_plot.py ${size} ${res_min} ${res_max} 
 
-sleep 0.5
+sleep 0.8
+
+
+# ---------------------- Select partitions -------------------------
 
 echo
 echo "--------------------------------------------------"
 echo
 
-# ---------------------- Select partitions -------------------------
-
-echo -e "${BOLD}${YELLOW_TEXT}Insert the range of resolution.${RESET_STYLE} "
+echo -e "${BOLD}${YELLOW_TEXT}Insert the resolution range.${RESET_STYLE} "
 
 # Get resolution_min
 while true; do
@@ -128,7 +128,7 @@ while true; do
 done
 
 
-./select_partitions_resolution_colors.out ${size} ${res_min} ${res_max}
+./select_partitions.out ${size} ${res_min} ${res_max}
 
 
 if [ $? != 0 ]; then
@@ -136,17 +136,72 @@ if [ $? != 0 ]; then
   exit 1
 fi
 
-# ---------------- Res_Rel Plot ----------------------
+# ---------------- Res_Rel Plot : Selected by Resolution ----------------------
 
-echo 
-echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE} "
+echo
+echo "--------------------------------------------------"
+echo
+
+echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE}"
 echo "Wait. A plot will be shown"
 
 python res_rel_plot.py ${size} ${res_min} ${res_max} 2> >(grep -v '^MESA-INTEL:' >&2) &
 # python res_rel_plot.py ${size} ${res_min} ${res_max} 
 
-sleep 0.5
+sleep 0.8
+
+
+# ---------------- Selecting Partition by Number of Colors ----------------------
 
 echo
 echo "--------------------------------------------------"
+
 echo
+
+echo -e "${BOLD}Colors.${RESET_STYLE} "
+
+# Get number of colors
+while true; do
+    read -p "Select the number of colors: " n_colors
+
+    # Check if input is an integer
+    if [[ "$n_colors" =~ ^-?[0-9]+$ ]]; then
+      if (( n_colors > 0 )); then
+        break
+      else 
+        echo -e "${RED_TEXT}Error: Please enter a positive integer.${RESET_STYLE}"
+      fi
+    else
+      echo -e "${RED_TEXT}Error: The input is not an integer.${RESET_STYLE}"
+    fi
+done
+
+# Get number of partitions
+while true; do
+    read -p "Select the number of partitions: " n_partitions
+
+    # Check if input is an integer
+    if [[ "$n_partitions" =~ ^-?[0-9]+$ ]]; then
+      if (( n_partitions > 0 )); then
+        break
+      else 
+        echo -e "${RED_TEXT}Error: Please enter a positive integer.${RESET_STYLE}"
+      fi
+    else
+      echo -e "${RED_TEXT}Error: The input is not an integer.${RESET_STYLE}"
+    fi
+done
+
+./select_partitions_colors.out ${size} ${res_min} ${res_max} ${n_colors} ${n_partitions}
+
+
+# ---------------- Res_Rel Plot : Selected by Number of Colors ----------------------
+
+echo 
+echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE}"
+echo -e "Wait. A plot will be shown."
+
+python res_rel_colors.py ${size} ${res_min} ${res_max} ${n_colors} 2> >(grep -v '^MESA-INTEL:' >&2) &
+# python res_rel_plot.py ${size} ${res_min} ${res_max} 
+
+sleep 0.8
