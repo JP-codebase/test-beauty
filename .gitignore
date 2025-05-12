@@ -2,5 +2,6 @@ partitions/*
 partitions
 *.out
 *.png
+*.svg
 *.bin
 *.null-ls*
