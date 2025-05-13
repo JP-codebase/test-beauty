@@ -192,7 +192,7 @@ def main():
     rel_vals = np.array(rel_vals)
     n_colors_vals = np.array(n_colors_vals)
 
-    sample_size = min(50000, len(res_vals))
+    sample_size = min(10000, len(res_vals))
     indices_sample = np.random.choice(len(res_vals), size=sample_size, replace=False)
 
     res_vals_sample = res_vals[indices_sample]
@@ -266,8 +266,8 @@ def main():
     # plt.ylabel("Frequency")
     # plt.grid(True)
 
-    n_bins = int(np.max(n_colors_vals_sample) - np.min(n_colors_vals_sample) + 1)
-    ax2.hist(n_colors_vals_sample, bins=n_bins, edgecolor="black")
+    n_bins = int(np.max(n_colors_vals) - np.min(n_colors_vals) + 1)
+    ax2.hist(n_colors_vals, bins=n_bins, edgecolor="black")
     ax2.set(title="Histogram Number of Colors", xlabel="Colors", ylabel="Frequency")
     ax2.grid(True)
 
