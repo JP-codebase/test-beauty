@@ -11,8 +11,8 @@ red_text="\e[31m"
 
 # --------------------- Compilers -----------------------------
 
-# compiler="g++"
-compiler="clang++"
+compiler="g++"
+# compiler="clang++"
 
 
 # --------------------- Start Compiling -----------------------
@@ -51,7 +51,7 @@ fi
 
 
 echo -e "generate_colored_grids.cpp : \c"
-${compiler} generate_colored_grids.cpp  -o generate_colored_grids.out -DREAL_IS_DOUBLE 
+${compiler} generate_colored_grids.cpp ./headers/quantifying_information.cpp  -o generate_colored_grids.out -DREAL_IS_DOUBLE 
 
 if [ $? -eq 0 ]; then
   echo -e "${bold}${green_text}Compilation complete.${reset_style}"

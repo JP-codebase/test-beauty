@@ -2,37 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-
-def plot_grid_high_contrast(grid):
-
-    grid_array = np.array(grid)
-
-    # Finds unique values and assign each a random color
-    unique_vals = np.unique(grid_array)
-
-    cmap = plt.get_cmap('tab20', len(unique_vals))
-
-    # Mapping from grid values to indices in the colormap
-    val_to_idx = {val: idx for idx, val in enumerate(unique_vals)}  # ?
-    grid_indices = np.vectorize(val_to_idx.get)(grid_array)
-
-    fig, ax = plt.subplots()
-
-    mesh = ax.pcolormesh(
-        grid_indices, cmap=cmap, edgecolors="k", linewidth=0.7, snap=True
-    )
-
-    ax.invert_yaxis()
-
-    ax.set_xticks([])
-    ax.set_yticks([])
-
-    ax.set_frame_on(False)
-
-    plt.tight_layout()
-    plt.show()
-
-
 def main():
 
     arguments = sys.argv[1:]
@@ -65,7 +34,6 @@ def main():
             + "]_"
             + "partitions_of_"
             + str(n)
-            + ".txt"
         )
 
     else:
@@ -74,11 +42,14 @@ def main():
         sys.exit(1)
 
 
+    fig, ax = plt.subplots()
+
     for k in range(0, n_partitions):
 
         # Read grid from file
-        file = open(path_partitions + f"{k + 1}_" + filename, "r")
+        file = open(path_partitions + f"{k + 1}_" + filename + ".txt", "r")
 
+        images = 0
         while(True):
             arr = []
             try:
@@ -90,7 +61,39 @@ def main():
                 grid = np.array(arr, np.int16)
                 grid = grid.reshape(width, height)
 
-                plot_grid_high_contrast(grid)
+                grid_array = np.array(grid)
+
+                # Finds unique values and assign each a random color
+                unique_vals = np.unique(grid_array)
+
+                cmap = plt.get_cmap('tab20', len(unique_vals))
+
+                # Mapping from grid values to indices in the colormap
+                val_to_idx = {val: idx for idx, val in enumerate(unique_vals)}  # ?
+                grid_indices = np.vectorize(val_to_idx.get)(grid_array)
+
+                # fig, ax = plt.subplots()
+
+                mesh = ax.pcolormesh(
+                    grid_indices, cmap=cmap, edgecolors="k", linewidth=0.7, snap=True
+                )
+
+                ax.invert_yaxis()
+
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+                ax.set_frame_on(False)
+
+                plt.tight_layout()
+
+                images = images + 1
+                plt.savefig(path_images + f"{k + 1}_" + filename + f"({images}).png", format="png")
+                # plt.savefig(path_images + f"({images})_{k + 1}_" + filename + ".svg", format="svg")
+                # plt.show()
+                plt.cla()
+
+                # plot_grid_high_contrast(grid)
                 
             except  ValueError:
                 # print("Skipping invalid line")

@@ -26,7 +26,7 @@ real_t relevance_degeneracy(unsigned int* dg_profile,
                             unsigned int dg_profile_size);
 
 // Energy of a lattice with boundary conditions
-real_t energy_colored_grid(unsigned int* lattice, unsigned int width,
+real_t energy_colored_grid(unsigned int* colored_grid, unsigned int width,
                       unsigned int height, char boundary_conditions = 'o');
 
 // Return the number of non-zero valued cells in the partiion

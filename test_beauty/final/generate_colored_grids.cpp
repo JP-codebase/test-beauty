@@ -1,3 +1,4 @@
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -17,11 +18,8 @@ void random_colored_grid_filling(unsigned int* colored_grid,
                                  std::vector<unsigned int>& partition,
                                  unsigned int array_size);
 
-real_t stationary_distribution(unsigned int* lattice, unsigned int width,
-                               unsigned int height, const real_t beta);
-
-void next_state(unsigned int* lattice, unsigned int width, unsigned int height,
-                unsigned int lattice_size);
+void next_state(unsigned int* colored_grid, unsigned int width,
+                unsigned int height, unsigned int colored_grid_size);
 
 unsigned int random_int_range(unsigned int n);
 
@@ -31,7 +29,7 @@ unsigned int random_int_range(unsigned int n);
 const char RED[] = "\033[31m";
 const char RESET_STYLE[] = "\033[m";
 
-const real_t b = 0.0005;
+const real_t b = 1.0;
 const char boundary_conditions { 'o' };
 
 
@@ -152,11 +150,30 @@ int main(int argc, char* argv[]) {
         random_colored_grid_filling(
             colored_grid, partition_list[p], partition_size);
 
-        const int iterations = 3;
+        const int iterations = 10000;
 
         for (int it = 0; it < iterations; it++) {
 
             // std::cout << "Partition " << p << std::endl;
+            next_state(colored_grid, width, height, partition_size);
+
+            // for (int i = 0; i < height; i++) {
+            //     for (int j = 0; j < width; j++) {
+            //         std::cout << colored_grid[i * width + j] << ' ';
+            //     }
+            //     std::cout << '\n';
+            // }
+            // std::cout << std::endl;
+
+            // for (int j = 0; j < partition_size; j++) {
+            //     output_file_colored_grid_txt << colored_grid[j] << " ";
+            // }
+            // output_file_colored_grid_txt << "\n";
+        }
+
+        for (int it = 0; it < 10; it++) {
+            next_state(colored_grid, width, height, partition_size);
+
             // for (int i = 0; i < height; i++) {
             //     for (int j = 0; j < width; j++) {
             //         std::cout << colored_grid[i * width + j] << ' ';
@@ -231,97 +248,84 @@ void random_colored_grid_filling(unsigned int* colored_grid,
     }
 }
 
-real_t stationary_distribution(unsigned int* lattice, unsigned int width,
-                               unsigned int height, const real_t beta = b) {
 
-    return std::exp(
-        -1.0 *
-        energy_colored_grid(lattice, width, height, boundary_conditions) *
-        beta);
-}
+void next_state(unsigned int* colored_grid, unsigned int width,
+                unsigned int height, unsigned int colored_grid_size) {
 
+    real_t energy1 { energy_colored_grid(
+        colored_grid, width, height, boundary_conditions) };
+    // std::cout << "Energy : " << energy1 << std::endl;
 
-void next_state(unsigned int* lattice, unsigned int width, unsigned int height,
-                unsigned int lattice_size) {
+    // Pick a pair of random cells
+    unsigned int cell1 { random_int_range(colored_grid_size - 1) };
+    unsigned int cell2 { random_int_range(colored_grid_size - 1) };
 
-    unsigned int cell1 { random_int_range(lattice_size - 1) };
-    unsigned int cell2 { random_int_range(lattice_size - 1) };
-
-
-    unsigned int* lattice2 { new unsigned int[lattice_size] };
-
-    // Copy lattice in lattice2
-    {
-        for (unsigned int *index { lattice }, *index2 { lattice2 };
-             index != (lattice + lattice_size);
-             ++index, ++index2) {
-            *index2 = *index;
-        }
-    }
-
-    // Swapping cell1 e cell2 in lattice2
-    unsigned int temp { lattice2[cell1] };
-    lattice2[cell1] = lattice[cell2];
-    lattice2[cell2] = temp;
-
-
-    // std::cout << "Swapping : " << (cell1 + 1) << " \033[3"
-    //           << (lattice[cell1] + 1) << "m"
+    // std::cout << "Swapping : (" << (cell1 / width + 1) << ", "
+    //           << (cell1  % width + 1) << ") \033[3"
+    //           << (colored_grid[cell1] + 1) << "m"
     //           << "■" << ' ';
-    // // std::cout << "\033[37m";   // White text
-    // std::cout << "\033[30m";   // Black text
-    // std::cout << " -> ";
-    // std::cout << (cell2 + 2) << " \033[3" << (lattice[cell2] + 1) << "m"
+    //
+    // std::cout << "\033[37m";   // White text
+    // // std::cout << "\033[30m";   // Black text
+    //
+    // std::cout << " -> (";
+    // std::cout << (cell2  / width + 1) << ", " << (cell2  % width + 1)
+    //           << ") \033[3" << (colored_grid[cell2] + 1) << "m"
     //           << "■" << ' ';
-    // // std::cout << "\033[37m";   // White text
-    // std::cout << "\033[30m";   // Black text
+    //
+    // std::cout << "\033[37m";   // White text
+    // // std::cout << "\033[30m";   // Black text
+    //
     // std::cout << std::endl;
 
+    if (cell1 == cell2)
+        return;
 
-    // Energy of the lattices
-    real_t energy1 { energy_colored_grid(
-        lattice, width, height, boundary_conditions) };
+    // Swap cell1 e cell2 in colored_grid
+    unsigned int temp { colored_grid[cell1] };
+    colored_grid[cell1] = colored_grid[cell2];
+    colored_grid[cell2] = temp;
+
     real_t energy2 { energy_colored_grid(
-        lattice2, width, height, boundary_conditions) };
+        colored_grid, width, height, boundary_conditions) };
 
-    real_t probability1 { stationary_distribution(lattice, width, height) };
-    real_t probability2 { stationary_distribution(lattice2, width, height) };
+    // Probability of Accepting the swap
+    real_t delta_energy = energy2 - energy1;
+    real_t acceptance =
+        (delta_energy > 0) ? std::exp(-1 * b * delta_energy) : 1.0;
 
-    real_t acceptance;
-    (1 < (probability2 / probability1))
-        ? acceptance = 1
-        : acceptance = (probability2 / probability1);
-
-    real_t rand_numb { real_distribution(generator) };
+    real_t rand_num { real_distribution(generator) };
 
     // std::cout << "Acceptance : " << acceptance << std::endl;
-    // (rand3 < acceptance) ? std::cout << "Accepted" : std::cout <<
-    // "Discarded"; std::cout << std::endl;
+    // (rand_num < acceptance) ? std::cout << "Accepted"
+    //                         : std::cout << "Discarded";
+    // std::cout << std::endl;
 
-    if (rand_numb < acceptance) {
+    if (rand_num <= acceptance) {
         // std::cout << "Accepted" << std::endl;
         // std::cout << std::endl;
 
-        lattice[cell1] = lattice[cell2];
-        lattice[cell2] = temp;
+        // colored_grid[cell1] = colored_grid[cell2];
+        // colored_grid[cell2] = temp;
 
     } else {
+        temp = colored_grid[cell1];
+        colored_grid[cell1] = colored_grid[cell2];
+        colored_grid[cell2] = temp;
+
         // std::cout << "Discarded" << std::endl;
     }
 
-    // for (int i = 0; i < lattice_shape[0]; i++) {
-    //     for (int j = 0; j < lattice_shape[1]; j++) {
-    //         std::cout << "\033[3" << (lattice[i * lattice_shape[1] + j] + 1)
-    //                   << "m"
+    // for (int i = 0; i < height; i++) {
+    //     for (int j = 0; j < width; j++) {
+    //         std::cout << "\033[3" << (colored_grid[i * width + j] + 1) << "m"
     //                   << "■" << ' ';
     //     }
     //     std::cout << std::endl;
     // }
     // std::cout << "\033[37m";   // White text
-    // std::cout << "\033[30m";   // Black text
-
+    // // std::cout << "\033[30m";   // Black text
+    //
     // std::cout << "----------------------------------------------" <<
     // std::endl; std::cout << std::endl;
-
-    delete[] lattice2;
 }
