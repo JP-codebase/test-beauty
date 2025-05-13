@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
         energy_min = energy_colored_grid(colored_grid, width, height);
         energy_max = energy_min;
 
-        const int iterations { 500000 };
+        const int iterations { 1000000 };
 
         std::cout << "Partition " << p + 1 << " : ";
         const int ten_percent { iterations / 10 };
@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
         }
 
 
-        for (int it = 0; it < 50; it++) {
+        for (int it = 0; it < 200; it++) {
 
             if (target_energy ==
                 next_state(colored_grid, width, height, partition_size)) {

@@ -223,22 +223,9 @@ fi
 # ---------------- Display Colored Grids ----------------------
 
 echo 
-echo -e "${BOLD}${GREEN_TEXT}Creating the colored grids images.${RESET_STYLE}"
-echo -e "Wait. A plot will be shown."
+echo -e "${BOLD}${GREEN_TEXT}Drawing the colored grids images.${RESET_STYLE}"
+echo -e "Search in ./images"
 
 python display_colored_grids.py ${width} ${height} ${res_min} ${res_max} ${n_colors} ${n_partitions} 
 # python display_colored_grids.py ${width} ${height} ${res_min} ${res_max} ${n_colors} ${n_partitions} 2> >(grep -v '^MESA-INTEL:' >&2) &
 # python res_rel_plot.py ${size} ${res_min} ${res_max} 
-
-sleep 0.8
-
-# ---------------- Res_Rel Plot : Selected by Number of Colors ----------------------
-
-# echo 
-# echo -e "${BOLD}${GREEN_TEXT}Plotting Resolution-Relevance.${RESET_STYLE}"
-# echo -e "Wait. A plot will be shown."
-#
-# python res_rel_colors.py ${size} ${res_min} ${res_max} ${n_colors} 2> >(grep -v '^MESA-INTEL:' >&2) &
-# # python res_rel_plot.py ${size} ${res_min} ${res_max} 
-#
-# sleep 0.8

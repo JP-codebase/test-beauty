@@ -192,7 +192,7 @@ def main():
     rel_vals = np.array(rel_vals)
     n_colors_vals = np.array(n_colors_vals)
 
-    sample_size = min(10000, len(res_vals))
+    sample_size = min(20000, len(res_vals))
     indices_sample = np.random.choice(len(res_vals), size=sample_size, replace=False)
 
     res_vals_sample = res_vals[indices_sample]
