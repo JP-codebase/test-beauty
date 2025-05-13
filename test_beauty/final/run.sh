@@ -198,6 +198,26 @@ done
 
 ./select_partitions_colors.out ${size} ${res_min} ${res_max} ${n_colors} ${n_partitions}
 
+if [ $? != 0 ]; then
+  echo -e "${BOLD}${RED_TEXT}Execution interruped.${RESET_STYLE}"
+  exit 1
+fi
+
+# ---------------- Selecting Partition by Number of Colors ----------------------
+
+echo
+echo "--------------------------------------------------"
+
+echo
+
+echo -e "${BOLD}Generate colored grids.${RESET_STYLE} "
+
+./generate_colored_grids.out ${width} ${height} ${res_min} ${res_max} ${n_colors} 
+
+if [ $? != 0 ]; then
+  echo -e "${BOLD}${RED_TEXT}Execution interruped.${RESET_STYLE}"
+  exit 1
+fi
 
 # ---------------- Res_Rel Plot : Selected by Number of Colors ----------------------
 

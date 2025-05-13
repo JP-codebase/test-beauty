@@ -7,8 +7,8 @@ import sys
 
 def read_resrel_bin(filename, real_t, sample_fraction):
 
-    # filename      :   name of the file to open
-    # real_t        :   'f' float or 'd' double
+    # filename             :   name of the file to open
+    # real_t               :   'f' float or 'd' double
     # sample_fraction      :   sample_fraction of points to plot ( 0 < sample_fraction <= 1 )
 
     match real_t:
@@ -243,7 +243,7 @@ def main():
         xlabel="Resolution",
         ylabel="Relevance",
     )
-    ax1.tick_params(axis='x', rotation=60)
+    ax1.tick_params(axis="x", rotation=60)
 
     # Edit Axis
     # plt.xlabel("Resolution")

@@ -6,7 +6,9 @@
 
 #include "quantifying_information.h"
 
-// Degeneracy profile
+
+/* ----------------- Degeneracy Profile ----------------------- */
+
 void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
                         unsigned int partition_size) {
     for (unsigned int i = 0; i < partition_size; i++) {
@@ -18,7 +20,7 @@ void degeneracy_profile(unsigned int* partition, unsigned int* dg_profile,
     }
 }
 
-// Resolution
+/* ----------------- Resolution ----------------------- */
 
 // Without knowing the degeneracy profile
 real_t resolution(unsigned int* partition, unsigned int partition_size) {
@@ -58,7 +60,8 @@ real_t resolution_degeneracy(unsigned int* dg_profile,
     return res;
 }
 
-// Relevance
+
+/* ----------------- Relevance ----------------------- */
 
 // Without knowing the degeneracy profile
 real_t relevance(unsigned int* partition, unsigned int partition_size) {
@@ -96,102 +99,70 @@ real_t relevance_degeneracy(unsigned int* dg_profile,
     return rel;
 }
 
-using number_of_bonds =
-    std::function<unsigned int(int, int, unsigned int*, unsigned int[2])>;
 
+/* ----------------- Energy ----------------------- */
+
+using number_of_bonds =
+    std::function<unsigned int(int, int, unsigned int*, unsigned int, unsigned int)>;
+
+// Open boundary conditions
 number_of_bonds open_boundary = [](int i, int j, unsigned int* lattice,
-                                   unsigned int lattice_shape[2]) {
-    unsigned int n_bounds { 0 };
+                                   unsigned int width, unsigned int height) {
+    unsigned int n_bonds { 0 };
 
     if (i > 0) {
-        if (lattice[i * lattice_shape[1] + j] ==
-            lattice[(i - 1) * lattice_shape[1] + j]) {
-            n_bounds++;
+        if (lattice[i * width + j] ==
+            lattice[(i - 1) * width + j]) {
+            n_bonds++;
         }
     }
 
-    if (i < (lattice_shape[0] - 1)) {
-        if (lattice[i * lattice_shape[1] + j] ==
-            lattice[(i + 1) * lattice_shape[1] + j]) {
-            n_bounds++;
+    if (i < (height - 1)) {
+        if (lattice[i * width + j] ==
+            lattice[(i + 1) * width + j]) {
+            n_bonds++;
         }
     }
 
     if (j > 0) {
-        if (lattice[i * lattice_shape[1] + j] ==
-            lattice[i * lattice_shape[1] + (j - 1)]) {
-            n_bounds++;
+        if (lattice[i * width + j] ==
+            lattice[i * width + (j - 1)]) {
+            n_bonds++;
         }
     }
 
-    if (j < (lattice_shape[1] - 1)) {
-        if (lattice[i * lattice_shape[1] + j] ==
-            lattice[i * lattice_shape[1] + (j + 1)]) {
-            n_bounds++;
+    if (j < (width - 1)) {
+        if (lattice[i * width + j] ==
+            lattice[i * width + (j + 1)]) {
+            n_bonds++;
         }
     }
 
-    return n_bounds;
+    return n_bonds;
 };
 
-number_of_bonds periodic_boundary = [](int i, int j, unsigned int* lattice,
-                                       unsigned int lattice_shape[2]) {
-    unsigned int n_bounds { 0 };
+real_t energy_colored_grid(unsigned int* lattice, unsigned int width,
+                           unsigned int height, char boundary_conditions) {
 
-    if (lattice[i * lattice_shape[1] + j] ==
-        lattice[((i - 1 + lattice_shape[0]) % lattice_shape[0]) *
-                    lattice_shape[1] +
-                j]) {
-        n_bounds++;
-    }
-
-    if (lattice[i * lattice_shape[1] + j] ==
-        lattice[((i + 1) % lattice_shape[0]) * lattice_shape[1] + j]) {
-        n_bounds++;
-    }
-
-    if (lattice[i * lattice_shape[1] + j] ==
-        lattice[i * lattice_shape[1] +
-                (j - 1 + lattice_shape[1]) % lattice_shape[1]]) {
-        n_bounds++;
-    }
-
-    if (lattice[i * lattice_shape[1] + j] ==
-        lattice[i * lattice_shape[1] + (j + 1) % lattice_shape[1]]) {
-        n_bounds++;
-    }
-
-    return n_bounds;
-};
-
-real_t energy_lattice(unsigned int* lattice, unsigned int lattice_shape[2],
-                      char boundary_conditions) {
-
+    // Add key-function pairs to use other boundary conditions
     std::unordered_map<char, number_of_bonds> boundary_functions = {
         { 'o', open_boundary },
-        { 'p', periodic_boundary },
     };
-    auto pair = boundary_functions.find(boundary_conditions);
 
+    auto pair = boundary_functions.find(boundary_conditions);
     number_of_bonds n_bonds = pair->second;
 
-    real_t energy { 0 };
+    real_t total_n_bonds { 0 };
     const real_t J { 1 };   // Coupling constant
 
-    /*for (int i = 0; i < lattice_shape[0]; i++) {*/
-    /*  for (int j = (i % 2 == 0) ? 0 : 1; j < lattice_shape[1]; j += 2) {*/
-    /*    energy -= n_bonds(i, j, lattice, lattice_shape);*/
-    /*  }*/
-    /*}*/
-
-    for (int i = 0; i < lattice_shape[0]; i++) {
-        for (int j = 0; j < lattice_shape[1]; j++) {
-            energy -= n_bonds(i, j, lattice, lattice_shape);
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            total_n_bonds += n_bonds(i, j, lattice, width, height);
         }
     }
 
-    energy = J * energy / 2.0;
-    return energy;
+    
+    return  - 1.0 * J * total_n_bonds / 2.0;
 }
 
 unsigned int number_of_colors_partition(unsigned int* partition,

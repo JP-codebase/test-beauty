@@ -8,13 +8,22 @@
 #include "./headers/precision.h"
 #include "./headers/quantifying_information.h"
 
-std::string real_t_without_trailing_zeros(real_t f);
 
-unsigned int random_int_range(unsigned int n);
+/* ------------------------ Functions --------------------------------- */
+
+std::string real_t_without_trailing_zeros(real_t f);
 
 void random_colored_grid_filling(unsigned int* colored_grid,
                                  std::vector<unsigned int>& partition,
                                  unsigned int array_size);
+
+real_t stationary_distribution(unsigned int* lattice, unsigned int width,
+                               unsigned int height, const real_t beta);
+
+void next_state(unsigned int* lattice, unsigned int width, unsigned int height,
+                unsigned int lattice_size);
+
+unsigned int random_int_range(unsigned int n);
 
 
 /* ------------------------ Constants --------------------------------- */
@@ -22,11 +31,13 @@ void random_colored_grid_filling(unsigned int* colored_grid,
 const char RED[] = "\033[31m";
 const char RESET_STYLE[] = "\033[m";
 
-const real_t beta = 0.0005;
+const real_t b = 0.0005;
 const char boundary_conditions { 'o' };
 
-std::random_device seed;   // Random seed
 
+/* ------------------- Random Number Generator -------------------------- */
+
+std::random_device seed;              // Random seed
 std::minstd_rand generator(seed());   // Linear congruential engine that
                                       // generates random numbers using a seed
 
@@ -36,7 +47,7 @@ std::uniform_real_distribution<real_t> real_distribution(0.0, 1.0);
 
 int main(int argc, char* argv[]) {
 
-    /* ------------------------ Input Check --------------------------------- */
+    /* ------------------------ Input Check ------------------------------ */
 
     unsigned int width {};
     unsigned int height {};
@@ -77,6 +88,7 @@ int main(int argc, char* argv[]) {
 
     unsigned int partition_size { width * height };
 
+
     /* --------------------- Open Input Files --------------------------- */
 
     std::string path { "./partitions/" };
@@ -97,7 +109,7 @@ int main(int argc, char* argv[]) {
     }
 
 
-    /* --------------- Reading Selected Partitions from File ---------------- */
+    /* --------------- Reading Selected Partitions from File -------------- */
 
 
     std::string line;
@@ -128,35 +140,36 @@ int main(int argc, char* argv[]) {
     for (int p = 0; p < partition_list.size(); p++) {
 
         std::ofstream output_file_colored_grid_txt(
-            "./images/" + std::to_string(p + 1) + "_" + filename + ".txt");
+            path + std::to_string(p + 1) + "_" + filename + ".txt");
 
         if (!output_file_colored_grid_txt) {
             std::cerr << RED << "Error : Could not open "
-                      << ("./images/" + std::to_string(p + 1) + "_" + filename +
+                      << (path + std::to_string(p + 1) + "_" + filename +
                           ".txt")
                       << " for writing." << RESET_STYLE << std::endl;
         }
 
-
         random_colored_grid_filling(
             colored_grid, partition_list[p], partition_size);
 
-        for (int j = 0; j < partition_size; j++) {
-            output_file_colored_grid_txt << colored_grid[j] << " ";
-        }
-        output_file_colored_grid_txt << "\n";
+        const int iterations = 3;
 
-        // std::cout << p << " : ";
-        //
-        // for (int j = 0; j < partition_size; j++) {
-        //     std::cout << partition_list[p][j] << ' ';
-        // }
-        // std::cout << "\t";
-        //
-        // for (int j = 0; j < partition_size; j++) {
-        //     std::cout << colored_grid[j] << ' ';
-        // }
-        // std::cout << std::endl;
+        for (int it = 0; it < iterations; it++) {
+
+            // std::cout << "Partition " << p << std::endl;
+            // for (int i = 0; i < height; i++) {
+            //     for (int j = 0; j < width; j++) {
+            //         std::cout << colored_grid[i * width + j] << ' ';
+            //     }
+            //     std::cout << '\n';
+            // }
+            // std::cout << std::endl;
+
+            for (int j = 0; j < partition_size; j++) {
+                output_file_colored_grid_txt << colored_grid[j] << " ";
+            }
+            output_file_colored_grid_txt << "\n";
+        }
 
         output_file_colored_grid_txt.close();
     }
@@ -165,7 +178,8 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/* ---------------------- Function Implementations ------------------------- */
+/* ---------------------- Function Implementations -------------------------
+ */
 
 std::string real_t_without_trailing_zeros(real_t f) {
 
@@ -200,7 +214,6 @@ void random_colored_grid_filling(unsigned int* colored_grid,
                                  std::vector<unsigned int>& partition,
                                  unsigned int array_size) {
 
-
     // Not-yet colored cells list
     std::vector<unsigned int> list(array_size);
     for (unsigned int i = 0; i < array_size; i++) {
@@ -216,4 +229,99 @@ void random_colored_grid_filling(unsigned int* colored_grid,
             list.erase(list.begin() + temp);
         }
     }
+}
+
+real_t stationary_distribution(unsigned int* lattice, unsigned int width,
+                               unsigned int height, const real_t beta = b) {
+
+    return std::exp(
+        -1.0 *
+        energy_colored_grid(lattice, width, height, boundary_conditions) *
+        beta);
+}
+
+
+void next_state(unsigned int* lattice, unsigned int width, unsigned int height,
+                unsigned int lattice_size) {
+
+    unsigned int cell1 { random_int_range(lattice_size - 1) };
+    unsigned int cell2 { random_int_range(lattice_size - 1) };
+
+
+    unsigned int* lattice2 { new unsigned int[lattice_size] };
+
+    // Copy lattice in lattice2
+    {
+        for (unsigned int *index { lattice }, *index2 { lattice2 };
+             index != (lattice + lattice_size);
+             ++index, ++index2) {
+            *index2 = *index;
+        }
+    }
+
+    // Swapping cell1 e cell2 in lattice2
+    unsigned int temp { lattice2[cell1] };
+    lattice2[cell1] = lattice[cell2];
+    lattice2[cell2] = temp;
+
+
+    // std::cout << "Swapping : " << (cell1 + 1) << " \033[3"
+    //           << (lattice[cell1] + 1) << "m"
+    //           << "■" << ' ';
+    // // std::cout << "\033[37m";   // White text
+    // std::cout << "\033[30m";   // Black text
+    // std::cout << " -> ";
+    // std::cout << (cell2 + 2) << " \033[3" << (lattice[cell2] + 1) << "m"
+    //           << "■" << ' ';
+    // // std::cout << "\033[37m";   // White text
+    // std::cout << "\033[30m";   // Black text
+    // std::cout << std::endl;
+
+
+    // Energy of the lattices
+    real_t energy1 { energy_colored_grid(
+        lattice, width, height, boundary_conditions) };
+    real_t energy2 { energy_colored_grid(
+        lattice2, width, height, boundary_conditions) };
+
+    real_t probability1 { stationary_distribution(lattice, width, height) };
+    real_t probability2 { stationary_distribution(lattice2, width, height) };
+
+    real_t acceptance;
+    (1 < (probability2 / probability1))
+        ? acceptance = 1
+        : acceptance = (probability2 / probability1);
+
+    real_t rand_numb { real_distribution(generator) };
+
+    // std::cout << "Acceptance : " << acceptance << std::endl;
+    // (rand3 < acceptance) ? std::cout << "Accepted" : std::cout <<
+    // "Discarded"; std::cout << std::endl;
+
+    if (rand_numb < acceptance) {
+        // std::cout << "Accepted" << std::endl;
+        // std::cout << std::endl;
+
+        lattice[cell1] = lattice[cell2];
+        lattice[cell2] = temp;
+
+    } else {
+        // std::cout << "Discarded" << std::endl;
+    }
+
+    // for (int i = 0; i < lattice_shape[0]; i++) {
+    //     for (int j = 0; j < lattice_shape[1]; j++) {
+    //         std::cout << "\033[3" << (lattice[i * lattice_shape[1] + j] + 1)
+    //                   << "m"
+    //                   << "■" << ' ';
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // std::cout << "\033[37m";   // White text
+    // std::cout << "\033[30m";   // Black text
+
+    // std::cout << "----------------------------------------------" <<
+    // std::endl; std::cout << std::endl;
+
+    delete[] lattice2;
 }
