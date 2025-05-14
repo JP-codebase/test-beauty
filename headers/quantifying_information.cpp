@@ -100,40 +100,50 @@ real_t relevance_degeneracy(unsigned int* dg_profile,
 }
 
 
-/* ----------------- Energy ----------------------- */
+/* ---------------------------- Energy ------------------------------------ */
 
-using number_of_bonds =
-    std::function<unsigned int(int, int, unsigned int*, unsigned int, unsigned int)>;
+using number_of_bonds = std::function<unsigned int(int, int, unsigned int*,
+                                                   unsigned int, unsigned int)>;
 
-// Open boundary conditions
-number_of_bonds open_boundary = [](int i, int j, unsigned int* lattice,
-                                   unsigned int width, unsigned int height) {
+
+/* Open boundary conditions orthogonal bounds
+
+    The 2D neighborhood looks like this:
+
+                 N                Offsets for each direction:
+                 |                    N : ( 0, +1)
+                 |                    S : ( 0, -1)
+       W -----   P   ----- E          E : (+1,  0)
+                 |                    W : (-1,  0)
+                 |
+                 S
+*/
+
+number_of_bonds open_boundary_orthogonal = [](int x, int y, unsigned int* grid,
+                                              unsigned int width,
+                                              unsigned int height) {
     unsigned int n_bonds { 0 };
 
-    if (i > 0) {
-        if (lattice[i * width + j] ==
-            lattice[(i - 1) * width + j]) {
+    if (x > 0) {
+        if (grid[x * width + y] == grid[(x - 1) * width + y]) {
             n_bonds++;
         }
     }
 
-    if (i < (height - 1)) {
-        if (lattice[i * width + j] ==
-            lattice[(i + 1) * width + j]) {
+    if (x < (height - 1)) {
+        if (grid[x * width + y] == grid[(x + 1) * width + y]) {
             n_bonds++;
         }
     }
 
-    if (j > 0) {
-        if (lattice[i * width + j] ==
-            lattice[i * width + (j - 1)]) {
+    if (y > 0) {
+        if (grid[x * width + y] == grid[x * width + (y - 1)]) {
             n_bonds++;
         }
     }
 
-    if (j < (width - 1)) {
-        if (lattice[i * width + j] ==
-            lattice[i * width + (j + 1)]) {
+    if (y < (width - 1)) {
+        if (grid[x * width + y] == grid[x * width + (y + 1)]) {
             n_bonds++;
         }
     }
@@ -141,12 +151,96 @@ number_of_bonds open_boundary = [](int i, int j, unsigned int* lattice,
     return n_bonds;
 };
 
-real_t energy_colored_grid(unsigned int* lattice, unsigned int width,
+
+/* Open boundary conditions with orthoganal and diagonal bonds
+
+    The 2D neighborhood looks like this:
+
+           NW    N    NE          Offsets for each direction:
+            \    |    /               N : ( 0, +1)
+             \   |   /                S : ( 0, -1)
+       W -----   P   ----- E          E : (+1,  0)
+             /   |   \                W : (-1,  0)
+            /    |    \              NE : (+1, +1)
+           SW    S    SE             NW : (-1, +1)
+                                     SE : (+1, -1)
+                                     SW : (-1, -1)
+*/
+
+number_of_bonds open_boundary_diagonal = [](int x, int y, unsigned int* grid,
+                                            unsigned int width,
+                                            unsigned int height) {
+    unsigned int n_bonds { 0 };
+    bool not_on_top_border;
+    bool not_on_bottom_border;
+
+    if (x > 0) {
+        not_on_top_border = true;
+        if (grid[x * width + y] == grid[(x - 1) * width + y]) {
+            n_bonds++;
+        }
+    } else {
+        not_on_top_border = false;
+    }
+
+
+    if (x < (height - 1)) {
+        not_on_bottom_border = true;
+        if (grid[x * width + y] == grid[(x + 1) * width + y]) {
+            n_bonds++;
+        }
+    } else {
+        not_on_bottom_border = false;
+    }
+
+
+    if (y > 0) {
+        if (grid[x * width + y] == grid[x * width + (y - 1)]) {
+            n_bonds++;
+        }
+
+        if (not_on_top_border) {
+            if (grid[x * width + y] == grid[(x - 1) * width + (y - 1)]) {
+                n_bonds++;
+            }
+        }
+
+        if (not_on_bottom_border) {
+            if (grid[x * width + y] == grid[(x + 1) * width + (y - 1)]) {
+                n_bonds++;
+            }
+        }
+    }
+
+    if (y < (width - 1)) {
+        if (grid[x * width + y] == grid[x * width + (y + 1)]) {
+            n_bonds++;
+        }
+
+        if (not_on_top_border) {
+            if (grid[x * width + y] == grid[(x - 1) * width + (y + 1)]) {
+                n_bonds++;
+            }
+        }
+
+        if (not_on_bottom_border) {
+            if (grid[x * width + y] == grid[(x + 1) * width + (y + 1)]) {
+                n_bonds++;
+            }
+        }
+    }
+
+    return n_bonds;
+};
+
+real_t energy_colored_grid(unsigned int* grid, unsigned int width,
                            unsigned int height, char boundary_conditions) {
 
+
     // Add key-function pairs to use other boundary conditions
+
     std::unordered_map<char, number_of_bonds> boundary_functions = {
-        { 'o', open_boundary },
+        { 'o', open_boundary_orthogonal }, { 'd', open_boundary_diagonal }
     };
 
     auto pair = boundary_functions.find(boundary_conditions);
@@ -157,12 +251,12 @@ real_t energy_colored_grid(unsigned int* lattice, unsigned int width,
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            total_n_bonds += n_bonds(i, j, lattice, width, height);
+            total_n_bonds += n_bonds(i, j, grid, width, height);
         }
     }
 
-    
-    return  - 1.0 * J * total_n_bonds / 2.0;
+
+    return -1.0 * J * total_n_bonds / 2.0;
 }
 
 unsigned int number_of_colors_partition(unsigned int* partition,

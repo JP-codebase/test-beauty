@@ -29,8 +29,8 @@ unsigned int random_int_range(unsigned int n);
 const char RED[] = "\033[31m";
 const char RESET_STYLE[] = "\033[m";
 
-const real_t b = 0.05;
-const char boundary_conditions { 'o' };
+const real_t b = 2;
+const char boundary_conditions { 'd' };
 
 
 /* ------------------- Random Number Generator -------------------------- */
@@ -155,10 +155,10 @@ int main(int argc, char* argv[]) {
         random_colored_grid_filling(
             colored_grid, partition_list[p], partition_size);
 
-        energy_min = energy_colored_grid(colored_grid, width, height);
+        energy_min = energy_colored_grid(colored_grid, width, height, boundary_conditions);
         energy_max = energy_min;
 
-        const int iterations { 10000000 };
+        const int iterations { 3000000  };
 
         std::cout << "Partition " << p + 1 << " : ";
         const int ten_percent { iterations / 10 };
@@ -166,11 +166,11 @@ int main(int argc, char* argv[]) {
         for (int it = 0; it < iterations; it++) {
             energy = next_state(colored_grid, width, height, partition_size);
 
-            // if (energy > energy_max) {
-            //     energy_max = energy;
-            // } else if (energy < energy_min) {
-            //     energy_min = energy;
-            // }
+            if (energy > energy_max) {
+                energy_max = energy;
+            } else if (energy < energy_min) {
+                energy_min = energy;
+            }
 
             if ((it % ten_percent) == 0) {
                 std::cout << '*' << std::flush;
@@ -179,10 +179,10 @@ int main(int argc, char* argv[]) {
         std::cout << std::endl;
 
 
-        // std::cout << std::setw(20) << "Min energy : " << std::setw(10)
-        //           << energy_min << std::endl;
-        // std::cout << std::setw(20) << "Max energy : " << std::setw(10)
-        //           << energy_max << std::endl;
+        std::cout << std::setw(20) << "Min energy : " << std::setw(10)
+                  << energy_min << std::endl;
+        std::cout << std::setw(20) << "Max energy : " << std::setw(10)
+                  << energy_max << std::endl;
 
         if (p == 0) {
             // std::cout << "Insert target energy : ";
