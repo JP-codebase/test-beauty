@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
         energy_min = energy_colored_grid(colored_grid, width, height);
         energy_max = energy_min;
 
-        const int iterations { 1000000 };
+        const int iterations { 10000000 };
 
         std::cout << "Partition " << p + 1 << " : ";
         const int ten_percent { iterations / 10 };
