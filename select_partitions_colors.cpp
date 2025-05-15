@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     {
         if (argc != 6) {
             std::cerr << RED << "Error: Expected 5 arguments: " << RESET_STYLE
-                      << "size resolution_min resolution_max n_colors. " << RED
+                      << "size resolution_min resolution_max n_colors n_partitions. " << RED
                       << "Got : " << RESET_STYLE << (argc - 1) << std::endl;
             return 1;
         }

@@ -29,7 +29,7 @@ unsigned int random_int_range(unsigned int n);
 const char RED[] = "\033[31m";
 const char RESET_STYLE[] = "\033[m";
 
-const real_t b = 2;
+const real_t b = 1;
 const char boundary_conditions { 'd' };
 
 
@@ -155,10 +155,11 @@ int main(int argc, char* argv[]) {
         random_colored_grid_filling(
             colored_grid, partition_list[p], partition_size);
 
-        energy_min = energy_colored_grid(colored_grid, width, height, boundary_conditions);
+        energy_min = energy_colored_grid(
+            colored_grid, width, height, boundary_conditions);
         energy_max = energy_min;
 
-        const int iterations { 3000000  };
+        const int iterations { 1000000 };
 
         std::cout << "Partition " << p + 1 << " : ";
         const int ten_percent { iterations / 10 };
@@ -191,7 +192,11 @@ int main(int argc, char* argv[]) {
         }
 
 
-        for (int it = 0; it < 200; it++) {
+        int grids_printed { 0 };
+
+        std::cout << "Finding colored grids with energy " << target_energy
+                  << std::endl;
+        for (int it = 0; (it < 50000) && (grids_printed < 10); it++) {
 
             if (target_energy ==
                 next_state(colored_grid, width, height, partition_size)) {
@@ -200,10 +205,15 @@ int main(int argc, char* argv[]) {
                     output_file_colored_grid_txt << colored_grid[j] << " ";
                 }
                 output_file_colored_grid_txt << "\n";
+
+                grids_printed++;
             }
         }
 
+        std::cout << "Found " << grids_printed
+                  << " colored grids with target energy." << std::endl;
         std::cout << std::endl;
+
         output_file_colored_grid_txt.close();
     }
 
