@@ -29,7 +29,7 @@ unsigned int random_int_range(unsigned int n);
 const char RED[] = "\033[31m";
 const char RESET_STYLE[] = "\033[m";
 
-const real_t b = 1;
+const real_t b = 10;
 const char boundary_conditions { 'd' };
 
 
