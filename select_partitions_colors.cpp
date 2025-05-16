@@ -29,9 +29,10 @@ int main(int argc, char* argv[]) {
     // Command line arguments
     {
         if (argc != 6) {
-            std::cerr << RED << "Error: Expected 5 arguments: " << RESET_STYLE
-                      << "size resolution_min resolution_max n_colors n_partitions. " << RED
-                      << "Got : " << RESET_STYLE << (argc - 1) << std::endl;
+            std::cerr
+                << RED << "Error: Expected 5 arguments: " << RESET_STYLE
+                << "size resolution_min resolution_max n_colors n_partitions. "
+                << RED << "Got : " << RESET_STYLE << (argc - 1) << std::endl;
             return 1;
         }
 
@@ -202,20 +203,33 @@ int main(int argc, char* argv[]) {
     /* --------------------- Output to Files ---------------------------- */
 
     unsigned int step {};
-    step = (rel_list_ordered.size() / n_partitions);
 
-    if (step * n_partitions != rel_list_ordered.size()) {
-        step++;
+    output_file_resrel_txt << res_list_ordered[0] << " " << rel_list_ordered[0]
+                           << "\n";
+
+    output_file_partitions_txt << (partition_list_ordered[0] + "\n");
+
+    if (rel_list_ordered.size() > 2) {
+        step = ((rel_list_ordered.size() - 2) / (n_partitions - 2));
+
+
+        for (int i = 1; i < rel_list_ordered.size() - 1; i = i + step) {
+
+            output_file_resrel_txt << res_list_ordered[i] << " "
+                                   << rel_list_ordered[i] << "\n";
+
+            output_file_partitions_txt << (partition_list_ordered[i] + "\n");
+        }
     }
 
+    output_file_resrel_txt << res_list_ordered[res_list_ordered.size() - 1]
+                           << " "
+                           << rel_list_ordered[rel_list_ordered.size() - 1]
+                           << "\n";
 
-    for (int i = 0; i < rel_list_ordered.size(); i = i + step) {
+    output_file_partitions_txt
+        << (partition_list_ordered[partition_list_ordered.size() - 1] + "\n");
 
-        output_file_resrel_txt << res_list_ordered[i] << " "
-                               << rel_list_ordered[i] << "\n";
-
-        output_file_partitions_txt << (partition_list_ordered[i] + "\n");
-    }
 
     input_file_partitions_txt.close();
     input_file_resrel_bin.close();

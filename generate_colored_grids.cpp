@@ -194,9 +194,10 @@ int main(int argc, char* argv[]) {
 
         int grids_printed { 0 };
 
+        unsigned int images_to_print { 5 };
         std::cout << "Finding colored grids with energy " << target_energy
                   << std::endl;
-        for (int it = 0; (it < 50000) && (grids_printed < 10); it++) {
+        for (int it = 0; (it < 50000) && (grids_printed < images_to_print); it++) {
 
             if (target_energy ==
                 next_state(colored_grid, width, height, partition_size)) {

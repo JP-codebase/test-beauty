@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
+
 def main():
 
     arguments = sys.argv[1:]
@@ -41,8 +42,16 @@ def main():
         print("Arguments : width height res_min res_max n_colors n_partitions")
         sys.exit(1)
 
-
     fig, ax = plt.subplots()
+
+    if width > height:
+        fig_width = 10
+        fig_height = fig_width / width * height
+    else:
+        fig_height = 10
+        fig_width = fig_height / height * width
+
+    fig.set_size_inches((fig_width, fig_height))
 
     for k in range(0, n_partitions):
 
@@ -50,7 +59,7 @@ def main():
         file = open(path_partitions + f"{k + 1}_" + filename + ".txt", "r")
 
         images = 0
-        while(True):
+        while True:
             arr = []
             try:
                 line = file.readline()
@@ -66,7 +75,7 @@ def main():
                 # Finds unique values and assign each a random color
                 unique_vals = np.unique(grid_array)
 
-                cmap = plt.get_cmap('tab20', len(unique_vals))
+                cmap = plt.get_cmap("tab20", len(unique_vals))
 
                 # Mapping from grid values to indices in the colormap
                 val_to_idx = {val: idx for idx, val in enumerate(unique_vals)}  # ?
@@ -79,6 +88,7 @@ def main():
                 )
 
                 ax.invert_yaxis()
+                ax.set_aspect("equal")
 
                 ax.set_xticks([])
                 ax.set_yticks([])
@@ -88,14 +98,17 @@ def main():
                 plt.tight_layout()
 
                 images = images + 1
-                plt.savefig(path_images + f"{k + 1}_" + filename + f"({images}).png", format="png")
+                plt.savefig(
+                    path_images + f"{k + 1}_" + filename + f"({images}).png",
+                    format="png",
+                )
                 # plt.savefig(path_images + f"({images})_{k + 1}_" + filename + ".svg", format="svg")
                 # plt.show()
                 plt.cla()
 
                 # plot_grid_high_contrast(grid)
-                
-            except  ValueError:
+
+            except ValueError:
                 # print("Skipping invalid line")
                 break
 
@@ -104,6 +117,7 @@ def main():
     # width, height = 10, 6
     # random_grid = np.random.randint(0, 12, size=(height, width))
     # plot_grid_high_contrast(random_grid)
+
 
 if __name__ == "__main__":
     main()

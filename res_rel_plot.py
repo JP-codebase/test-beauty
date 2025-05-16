@@ -1,3 +1,4 @@
+from types import new_class
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -174,8 +175,6 @@ def main():
 
     # ---------------------- Resolution-Relevance Plot ------------------------
 
-    # plt.figure(figsize=(6, 5))
-
     fig, (ax1, ax2) = plt.subplots(
         1,
         2,
@@ -199,16 +198,6 @@ def main():
     rel_vals_sample = rel_vals[indices_sample]
     n_colors_vals_sample = n_colors_vals[indices_sample]
 
-    # scatter_colors = plt.scatter(
-    #     res_vals_sample,
-    #     rel_vals_sample,
-    #     c=n_colors_vals_sample,
-    #     cmap="viridis",
-    #     # alpha=0.7,
-    #     marker=".",
-    #     # s=4,
-    # )
-
     scatter_colors = ax1.scatter(
         res_vals_sample,
         rel_vals_sample,
@@ -220,18 +209,8 @@ def main():
     )
 
     # Add a colorbar to show the mapping from z-value to color:
-    # cbar = plt.colorbar(scatter_colors)
     cbar = fig.colorbar(scatter_colors)
     cbar.set_label("Number of colors")
-
-    # plt.title(
-    #     "n = "
-    #     + str(n)
-    #     + "    N. Partitions ~ "
-    #     + str(int(len(res_vals) / sample_fraction))
-    #     + "    Points shown : "
-    #     + str(sample_size)
-    # )
 
     ax1.set(
         title="n = "
@@ -245,29 +224,16 @@ def main():
     )
     ax1.tick_params(axis="x", rotation=60)
 
-    # Edit Axis
-    # plt.xlabel("Resolution")
-    # plt.ylabel("Relevance")
-    # plt.xticks(rotation=60, ha="right")
-
     # plt.grid(True)
     ax1.grid(True)
 
-    # plt.tight_layout()
-    # plt.savefig(path + filename + "_resrel.svg", format="svg", dpi="figure")
-
-    # Right : Plot the histogram
-    # plt.figure(figsize=(6, 5))
-
-    # n_bins = int(np.max(n_colors_vals_sample) - np.min(n_colors_vals_sample) + 1)
-    # plt.hist(n_colors_vals_sample, bins=n, edgecolor="black")
-    # plt.title("Histogram Number of Colors")
-    # plt.xlabel("Colors")
-    # plt.ylabel("Frequency")
-    # plt.grid(True)
-
+    # --------------- Histogram ------------------------
     n_bins = int(np.max(n_colors_vals) - np.min(n_colors_vals) + 1)
-    ax2.hist(n_colors_vals, bins=n_bins, edgecolor="black")
+    bins_edges = np.arange(np.min(n_colors_vals) - 0.5, np.max(n_colors_vals) + 0.5)
+
+    n, bins, patches = ax2.hist(n_colors_vals, bins=bins_edges, align="mid", edgecolor="black")
+    # print(f"N bins {len(n)}", f"\tEdges{len(bins)}")
+
     ax2.set(title="Histogram Number of Colors", xlabel="Colors", ylabel="Frequency")
     ax2.grid(True)
 
